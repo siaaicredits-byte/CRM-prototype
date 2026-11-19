@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — premium dark navy with electric blue accents.
+ * The app is dark-only by design, so tokens are defined once.
+ */
+@theme {
+  --color-navy-950: #0a1128; /* app background */
+  --color-navy-900: #0d1733; /* sidebar / topbar */
+  --color-surface: #111c3d; /* cards */
+  --color-surface-raised: #16234a; /* hover / inset */
+  --color-line: #1f2d5c; /* borders, gridlines */
+  --color-line-strong: #2a3a70;
+
+  --color-accent: #2f80ff; /* electric blue */
+  --color-accent-hover: #4a92ff;
+  --color-accent-soft: rgb(47 128 255 / 0.14);
+  --color-glow: #22d3ee; /* decorative only — never a data series */
+
+  --color-ink: #e6ecff; /* primary text */
+  --color-ink-muted: #8a96b8; /* secondary text */
+  --color-ink-faint: #5c6890; /* tertiary text, axis labels */
+
+  --color-good: #34d399;
+  --color-warn: #fbbf24;
+  --color-bad: #f87171;
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-grow-x: grow-x 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* ========================================
+   PULSECRM - GLOBAL DARK DROPDOWN THEME
+======================================== */
+
+select {
+  color-scheme: dark !important;
+  background-color: #111a35 !important;
+  color: #f8fafc !important;
+}
+
+select option {
+  background-color: #111a35 !important;
+  color: #f8fafc !important;
+}
+
+select option:checked {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+body {
+  background-color: var(--color-navy-950);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Subtle ambient glow behind the content area. */
+.app-backdrop {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgb(47 128 255 / 0.12), transparent 60%),
+    radial-gradient(40rem 24rem at -10% 110%, rgb(34 211 238 / 0.06), transparent 60%),
+    var(--color-navy-950);
+}
+
+/* Thin, navy-tinted scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

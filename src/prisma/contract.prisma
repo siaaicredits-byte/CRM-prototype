@@ -1,0 +1,70 @@
+
+// use prisma-8
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String?
+  name      String?
+  createdAt DateTime @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+}
+
+model Company {
+  id          Int       @id @default(autoincrement())
+  name        String
+  website     String?
+  industry    String?
+  phone       String?
+  email       String?
+  address     String?
+  description String?
+  contacts    Contact[]
+  leads       Lead[]
+  deals       Deal[]
+  createdAt   DateTime  @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
+}
+
+model Contact {
+  id        Int       @id @default(autoincrement())
+  firstName String
+  lastName  String?
+  email     String?   @unique
+  phone     String?
+  jobTitle  String?
+  companyId Int?
+  company   Company?  @relation(fields: [companyId], references: [id])
+  createdAt DateTime  @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+}
+
+model Lead {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String?
+  email     String?
+  phone     String?
+  source    String?
+  status    String   @default("NEW")
+  score     Int?
+  value     Float    @default(0)
+  owner     String   @default("Unassigned")
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+}
+
+model Deal {
+  id        Int      @id @default(autoincrement())
+  title     String
+  stage     String   @default("discovery")
+  value     Float    @default(0)
+  owner     String   @default("Unassigned")
+  closeDate DateTime
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+}
