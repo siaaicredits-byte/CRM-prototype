@@ -1,5 +1,6 @@
 
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 import type { Lead, LeadSource, LeadStatus } from "@/types/crm";
 
 const validSources: LeadSource[] = [
@@ -19,13 +20,22 @@ const validStatuses: LeadStatus[] = [
 ];
 
 export async function getDatabaseLeads(): Promise<Lead[]> {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return [];
+  }
+
   const records = await db.orm.public.Lead
-    .where({})
+    .where({ userId: currentUser.id })
     .all();
 
   return records.map((record) => {
     const source = record.source as LeadSource;
     const status = record.status as LeadStatus;
+
+    const normalizedStatus =
+      status.charAt(0) + status.slice(1).toLowerCase();
 
     return {
       id: String(record.id),
@@ -36,10 +46,8 @@ export async function getDatabaseLeads(): Promise<Lead[]> {
       email: record.email ?? "",
       phone: record.phone ?? "",
       source: validSources.includes(source) ? source : "Website",
-      status: validStatuses.includes(
-        status.charAt(0) + status.slice(1).toLowerCase() as LeadStatus
-      )
-        ? (status.charAt(0) + status.slice(1).toLowerCase()) as LeadStatus
+      status: validStatuses.includes(normalizedStatus as LeadStatus)
+        ? (normalizedStatus as LeadStatus)
         : "New",
       value: Number(record.value ?? 0),
       owner: record.owner ?? "Unassigned",

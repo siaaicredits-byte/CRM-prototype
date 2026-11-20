@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -12,6 +13,15 @@ export async function PUT(
   { params }: RouteContext
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const companyId = Number(id);
 
@@ -19,6 +29,17 @@ export async function PUT(
       return NextResponse.json(
         { success: false, message: "Invalid company ID." },
         { status: 400 }
+      );
+    }
+
+    const existing = await db.orm.public.Company
+      .where({ id: companyId, userId: currentUser.id })
+      .first();
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, message: "Company not found." },
+        { status: 404 }
       );
     }
 
@@ -48,24 +69,17 @@ export async function PUT(
 
     if (website && !/^https?:\/\/.+\..+/.test(website)) {
       return NextResponse.json(
-        { success: false, message: "Enter a valid website URL starting with http:// or https://." },
+        {
+          success: false,
+          message:
+            "Enter a valid website URL starting with http:// or https://.",
+        },
         { status: 400 }
       );
     }
 
-    const existing = await db.orm.public.Company
-      .where({ id: companyId })
-      .first();
-
-    if (!existing) {
-      return NextResponse.json(
-        { success: false, message: "Company not found." },
-        { status: 404 }
-      );
-    }
-
     const company = await db.orm.public.Company
-      .where({ id: companyId })
+      .where({ id: companyId, userId: currentUser.id })
       .update({
         name,
         website: website || null,
@@ -97,6 +111,15 @@ export async function DELETE(
   { params }: RouteContext
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const companyId = Number(id);
 
@@ -108,7 +131,7 @@ export async function DELETE(
     }
 
     const existing = await db.orm.public.Company
-      .where({ id: companyId })
+      .where({ id: companyId, userId: currentUser.id })
       .first();
 
     if (!existing) {
@@ -119,7 +142,7 @@ export async function DELETE(
     }
 
     await db.orm.public.Company
-      .where({ id: companyId })
+      .where({ id: companyId, userId: currentUser.id })
       .delete();
 
     return NextResponse.json({
@@ -132,7 +155,8 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        message: "Unable to delete company. It may be linked to existing contacts or leads.",
+        message:
+          "Unable to delete company. It may be linked to existing contacts or leads.",
       },
       { status: 500 }
     );

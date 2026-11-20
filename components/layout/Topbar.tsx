@@ -1,13 +1,23 @@
+
 import { Bell, Search } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { DEMO_USER } from "@/lib/demo-data";
 import { MobileNav } from "./MobileNav";
 
-export function Topbar() {
+interface TopbarProps {
+  user: {
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
+
+export function Topbar({ user }: TopbarProps) {
+  const displayName = user.name || user.email;
+
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-navy-950/75 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
-        <MobileNav />
+        <MobileNav user={user} />
 
         <label className="relative flex min-w-0 max-w-md flex-1 items-center">
           <span className="sr-only">Search</span>
@@ -31,10 +41,14 @@ export function Topbar() {
           >
             <Bell className="size-[18px]" aria-hidden="true" />
           </button>
+
           <span className="hidden h-6 w-px bg-line sm:block" aria-hidden="true" />
+
           <div className="flex items-center gap-2.5 pl-1">
-            <Avatar name={DEMO_USER.name} />
-            <span className="hidden text-sm font-medium text-ink md:block">{DEMO_USER.name}</span>
+            <Avatar name={displayName} />
+            <span className="hidden text-sm font-medium text-ink md:block">
+              {displayName}
+            </span>
           </div>
         </div>
       </div>

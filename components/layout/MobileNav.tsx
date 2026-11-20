@@ -7,8 +7,16 @@ import { Brand } from "./Brand";
 import { SidebarNav, SidebarNavFallback } from "./SidebarNav";
 import { UserCard } from "./UserCard";
 
+interface MobileNavProps {
+  user: {
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
+
 /** Hamburger button + slide-out drawer, shown below the `lg` breakpoint. */
-export function MobileNav() {
+export function MobileNav({ user }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -80,7 +88,7 @@ export function MobileNav() {
             </Suspense>
           </div>
           <div className="pt-4">
-            <UserCard />
+          <UserCard user={user} />
           </div>
         </aside>
       </div>

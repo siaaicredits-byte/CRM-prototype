@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 const allowedSources = [
   "Website",
@@ -23,6 +24,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const leadId = Number(id);
 
@@ -30,6 +40,17 @@ export async function PUT(
       return NextResponse.json(
         { success: false, message: "Invalid lead ID." },
         { status: 400 }
+      );
+    }
+
+    const existingLead = await db.orm.public.Lead
+      .where({ id: leadId, userId: currentUser.id })
+      .first();
+
+    if (!existingLead) {
+      return NextResponse.json(
+        { success: false, message: "Lead not found." },
+        { status: 404 }
       );
     }
 
@@ -41,12 +62,14 @@ export async function PUT(
     const phone = String(body.phone ?? "").trim();
     const source = String(body.source ?? "");
     const status = String(body.status ?? "NEW");
-    const owner = String(body.owner ?? "Unassigned").trim();
     const value = Number(body.value ?? 0);
 
     if (!firstName || !email) {
       return NextResponse.json(
-        { success: false, message: "First name and email are required." },
+        {
+          success: false,
+          message: "First name and email are required.",
+        },
         { status: 400 }
       );
     }
@@ -58,7 +81,10 @@ export async function PUT(
       );
     }
 
-    if (!allowedSources.includes(source) || !allowedStatuses.includes(status)) {
+    if (
+      !allowedSources.includes(source) ||
+      !allowedStatuses.includes(status)
+    ) {
       return NextResponse.json(
         { success: false, message: "Invalid source or status." },
         { status: 400 }
@@ -72,19 +98,8 @@ export async function PUT(
       );
     }
 
-    const existingLead = await db.orm.public.Lead
-      .where({ id: leadId })
-      .first();
-
-    if (!existingLead) {
-      return NextResponse.json(
-        { success: false, message: "Lead not found." },
-        { status: 404 }
-      );
-    }
-
     await db.orm.public.Lead
-      .where({ id: leadId })
+      .where({ id: leadId, userId: currentUser.id })
       .update({
         firstName,
         lastName: lastName || null,
@@ -92,7 +107,7 @@ export async function PUT(
         phone: phone || null,
         source,
         status,
-        owner: owner || "Unassigned",
+        owner: currentUser.name || currentUser.email,
         value,
       });
 
@@ -115,6 +130,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const leadId = Number(id);
 
@@ -126,7 +150,7 @@ export async function DELETE(
     }
 
     const existingLead = await db.orm.public.Lead
-      .where({ id: leadId })
+      .where({ id: leadId, userId: currentUser.id })
       .first();
 
     if (!existingLead) {
@@ -137,7 +161,7 @@ export async function DELETE(
     }
 
     await db.orm.public.Lead
-      .where({ id: leadId })
+      .where({ id: leadId, userId: currentUser.id })
       .delete();
 
     return NextResponse.json({

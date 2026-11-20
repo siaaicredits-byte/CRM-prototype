@@ -1,5 +1,6 @@
 
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 export interface DatabaseCompany {
   id: string;
@@ -14,7 +15,15 @@ export interface DatabaseCompany {
 }
 
 export async function getDatabaseCompanies(): Promise<DatabaseCompany[]> {
-  const records = await db.orm.public.Company.where({}).all();
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return [];
+  }
+
+  const records = await db.orm.public.Company
+    .where({ userId: currentUser.id })
+    .all();
 
   return records.map((record) => ({
     id: String(record.id),

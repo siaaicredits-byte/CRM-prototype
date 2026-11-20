@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Building2,
@@ -13,9 +13,11 @@ import {
   Users,
   ArrowLeft,
 } from "lucide-react";
+
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 export const metadata: Metadata = {
   title: "Company Details",
@@ -25,15 +27,33 @@ type CompanyDetailsPageProps = {
   params: Promise<{ id: string }>;
 };
 
-async function CompanyDetailsData({ id }: { id: number }) {
-  const [company, contacts] = await Promise.all([
-    db.orm.public.Company.where({ id }).first(),
-    db.orm.public.Contact.where({ companyId: id }).all(),
-  ]);
+async function CompanyDetailsData({
+  id,
+  userId,
+}: {
+  id: number;
+  userId: number;
+}) {
+  // Only retrieve a company owned by the authenticated user.
+  const company = await db.orm.public.Company
+    .where({
+      id,
+      userId,
+    })
+    .first();
 
   if (!company) {
     notFound();
   }
+
+  // Only retrieve contacts belonging to the same user
+  // and associated with this company.
+  const contacts = await db.orm.public.Contact
+    .where({
+      companyId: id,
+      userId,
+    })
+    .all();
 
   return (
     <div className="flex flex-col gap-6">
@@ -198,6 +218,12 @@ async function CompanyDetailsContent({
 }: CompanyDetailsPageProps) {
   await connection();
 
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const { id } = await params;
   const companyId = Number(id);
 
@@ -205,7 +231,12 @@ async function CompanyDetailsContent({
     notFound();
   }
 
-  return <CompanyDetailsData id={companyId} />;
+  return (
+    <CompanyDetailsData
+      id={companyId}
+      userId={user.id}
+    />
+  );
 }
 
 export default function CompanyDetailsPage({

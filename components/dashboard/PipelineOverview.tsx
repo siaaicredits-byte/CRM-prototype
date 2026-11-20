@@ -8,7 +8,10 @@ interface PipelineOverviewProps {
 
 /** Horizontal bars: deal value per pipeline stage. */
 export function PipelineOverview({ stages, summary }: PipelineOverviewProps) {
-  const maxValue = Math.max(...stages.map((stage) => summary[stage.id].value));
+const maxValue = Math.max(
+  1,
+  ...stages.map((stage) => summary[stage.id].value)
+);
   const openStages = stages.filter((stage) => stage.id !== "won");
   const weighted = openStages.reduce(
     (sum, stage) => sum + summary[stage.id].value * stage.probability,

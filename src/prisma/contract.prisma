@@ -2,14 +2,22 @@
 // use prisma-8
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  createdAt DateTime @default(now()) @onCreate(now())
-  updatedAt temporal.UpdatedAt
-}
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  username     String?
+  name         String?
+  passwordHash String?
+  role         String    @default("SALES_REP")
+  isActive     Boolean   @default(true)
+  tasks        Task[]
+  leads        Lead[]
+  contacts     Contact[]
+  companies    Company[]
+  deals        Deal[]
 
+  createdAt    DateTime  @default(now()) @onCreate(now())
+  updatedAt    temporal.UpdatedAt
+}
 model Company {
   id          Int       @id @default(autoincrement())
   name        String
@@ -19,12 +27,15 @@ model Company {
   email       String?
   address     String?
   description String?
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id])
   contacts    Contact[]
   leads       Lead[]
   deals       Deal[]
   createdAt   DateTime  @default(now()) @onCreate(now())
   updatedAt   temporal.UpdatedAt
 }
+
 
 model Contact {
   id        Int       @id @default(autoincrement())
@@ -33,10 +44,13 @@ model Contact {
   email     String?   @unique
   phone     String?
   jobTitle  String?
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id])
   companyId Int?
   company   Company?  @relation(fields: [companyId], references: [id])
   createdAt DateTime  @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
+  tasks        Task[]
 }
 
 model Lead {
@@ -50,10 +64,13 @@ model Lead {
   score     Int?
   value     Float    @default(0)
   owner     String   @default("Unassigned")
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
   createdAt DateTime @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
+  tasks        Task[]
 }
 
 model Deal {
@@ -63,8 +80,38 @@ model Deal {
   value     Float    @default(0)
   owner     String   @default("Unassigned")
   closeDate DateTime
+  tasks        Task[]
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
+
   createdAt DateTime @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String   @default("Follow-up")
+  priority    String   @default("Medium")
+  due         DateTime
+  done        Boolean  @default(false)
+
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  leadId      Int?
+  lead        Lead?    @relation(fields: [leadId], references: [id])
+
+  contactId   Int?
+  contact     Contact? @relation(fields: [contactId], references: [id])
+
+  dealId      Int?
+  deal        Deal?    @relation(fields: [dealId], references: [id])
+
+  createdAt   DateTime @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
 }

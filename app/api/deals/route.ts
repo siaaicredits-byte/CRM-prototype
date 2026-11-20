@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 const validStages = [
   "discovery",
@@ -12,9 +13,23 @@ const validStages = [
 
 export async function GET() {
   try {
-    const deals = await db.orm.public.Deal.where({}).all();
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const deals = await db.orm.public.Deal
+      .where({ userId: currentUser.id })
+      .all();
+
     return NextResponse.json(deals);
-  } catch {
+  } catch (error) {
+    console.error("Fetch deals failed:", error);
+
     return NextResponse.json(
       { error: "Failed to retrieve deals." },
       { status: 500 }
@@ -24,16 +39,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const title = typeof body.title === "string" ? body.title.trim() : "";
     const stage = body.stage;
-    const owner =
-      typeof body.owner === "string" && body.owner.trim()
-        ? body.owner.trim()
-        : "Unassigned";
     const value = Number(body.value);
     const closeDate = new Date(body.closeDate);
+
     const companyId =
       body.companyId === "" || body.companyId == null
         ? null
@@ -77,15 +98,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify that the selected company belongs to the current user.
     if (companyId !== null) {
       const company = await db.orm.public.Company
-        .where({ id: companyId })
+        .where({
+          id: companyId,
+          userId: currentUser.id,
+        })
         .first();
 
       if (!company) {
         return NextResponse.json(
-          { error: "Selected company was not found." },
-          { status: 404 }
+          {
+            error:
+              "Selected company does not exist or you do not have access to it.",
+          },
+          { status: 403 }
         );
       }
     }
@@ -94,13 +122,16 @@ export async function POST(request: NextRequest) {
       title,
       stage,
       value,
-      owner,
+      owner: currentUser.name || currentUser.email,
       closeDate,
       companyId,
+      userId: currentUser.id,
     });
 
     return NextResponse.json(deal, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Create deal failed:", error);
+
     return NextResponse.json(
       { error: "Failed to create deal." },
       { status: 500 }

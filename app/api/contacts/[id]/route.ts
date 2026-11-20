@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -12,6 +13,15 @@ export async function PUT(
   context: RouteContext
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
     const contactId = Number(id);
 
@@ -23,7 +33,7 @@ export async function PUT(
     }
 
     const existing = await db.orm.public.Contact
-      .where({ id: contactId })
+      .where({ id: contactId, userId: currentUser.id })
       .first();
 
     if (!existing) {
@@ -72,21 +82,29 @@ export async function PUT(
       );
     }
 
+    // Verify that the selected company belongs to the current user.
     if (companyId !== null) {
       const company = await db.orm.public.Company
-        .where({ id: companyId })
+        .where({
+          id: companyId,
+          userId: currentUser.id,
+        })
         .first();
 
       if (!company) {
         return NextResponse.json(
-          { success: false, message: "Selected company does not exist." },
-          { status: 400 }
+          {
+            success: false,
+            message:
+              "Selected company does not exist or you do not have access to it.",
+          },
+          { status: 403 }
         );
       }
     }
 
     const contact = await db.orm.public.Contact
-      .where({ id: contactId })
+      .where({ id: contactId, userId: currentUser.id })
       .update({
         firstName,
         lastName: lastName || null,
@@ -117,6 +135,15 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
     const contactId = Number(id);
 
@@ -128,7 +155,7 @@ export async function DELETE(
     }
 
     const existing = await db.orm.public.Contact
-      .where({ id: contactId })
+      .where({ id: contactId, userId: currentUser.id })
       .first();
 
     if (!existing) {
@@ -139,7 +166,7 @@ export async function DELETE(
     }
 
     await db.orm.public.Contact
-      .where({ id: contactId })
+      .where({ id: contactId, userId: currentUser.id })
       .delete();
 
     return NextResponse.json({

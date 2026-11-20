@@ -1,11 +1,23 @@
 
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 import type { Contact } from "@/types/crm";
 
 export async function getDatabaseContacts(): Promise<Contact[]> {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return [];
+  }
+
   const [records, companies] = await Promise.all([
-    db.orm.public.Contact.where({}).all(),
-    db.orm.public.Company.where({}).all(),
+    db.orm.public.Contact
+      .where({ userId: currentUser.id })
+      .all(),
+
+    db.orm.public.Company
+      .where({ userId: currentUser.id })
+      .all(),
   ]);
 
   const companyNames = new Map(

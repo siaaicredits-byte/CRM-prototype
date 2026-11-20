@@ -1,11 +1,23 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
-// GET ALL COMPANIES
+// GET USER'S COMPANIES
 export async function GET() {
   try {
-    const companies = await db.orm.public.Company.where({}).all();
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const companies = await db.orm.public.Company
+      .where({ userId: currentUser.id })
+      .all();
 
     return NextResponse.json({
       success: true,
@@ -24,6 +36,15 @@ export async function GET() {
 // CREATE COMPANY
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const name = String(body.name ?? "").trim();
@@ -50,7 +71,11 @@ export async function POST(request: NextRequest) {
 
     if (website && !/^https?:\/\/.+\..+/.test(website)) {
       return NextResponse.json(
-        { success: false, message: "Enter a valid website URL starting with http:// or https://." },
+        {
+          success: false,
+          message:
+            "Enter a valid website URL starting with http:// or https://.",
+        },
         { status: 400 }
       );
     }
@@ -63,6 +88,7 @@ export async function POST(request: NextRequest) {
       email: email || null,
       address: address || null,
       description: description || null,
+      userId: currentUser.id,
     });
 
     return NextResponse.json(

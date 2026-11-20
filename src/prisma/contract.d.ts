@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'240feca31e36b338a8c6dd4861055fa5048e129ea8acad00e679a58b985f8d7c'>;
+  StorageHashBase<'5970dfc07414063e3335fdd0f9756955e16c215de1fe4bec05010e0c7536b94d'>;
 export type ExecutionHash =
-  ExecutionHashBase<'26af925cba63d344605849e772b66ff23232066578ec80a5d887741fb945a177'>;
+  ExecutionHashBase<'52c6a2bb0dcb2a8b5a39a1ff434dc6bf5786c67e323577eab8b588d5cff7c523'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -319,11 +319,13 @@ export namespace Models {
     name: FieldOutputTypes['public']['Company']['name'];
     phone: FieldOutputTypes['public']['Company']['phone'];
     updatedAt: FieldOutputTypes['public']['Company']['updatedAt'];
+    userId: FieldOutputTypes['public']['Company']['userId'];
     website: FieldOutputTypes['public']['Company']['website'];
     contacts: public_Contact[];
     deals: public_Deal[];
     leads: public_Lead[];
-    readonly [RelationKeys]?: 'contacts' | 'deals' | 'leads';
+    user: public_User | null;
+    readonly [RelationKeys]?: 'contacts' | 'deals' | 'leads' | 'user';
   };
   export type public_Contact = {
     companyId: FieldOutputTypes['public']['Contact']['companyId'];
@@ -335,8 +337,11 @@ export namespace Models {
     lastName: FieldOutputTypes['public']['Contact']['lastName'];
     phone: FieldOutputTypes['public']['Contact']['phone'];
     updatedAt: FieldOutputTypes['public']['Contact']['updatedAt'];
+    userId: FieldOutputTypes['public']['Contact']['userId'];
     company: public_Company | null;
-    readonly [RelationKeys]?: 'company';
+    tasks: public_Task[];
+    user: public_User | null;
+    readonly [RelationKeys]?: 'company' | 'tasks' | 'user';
   };
   export type public_Deal = {
     closeDate: FieldOutputTypes['public']['Deal']['closeDate'];
@@ -347,9 +352,12 @@ export namespace Models {
     stage: FieldOutputTypes['public']['Deal']['stage'];
     title: FieldOutputTypes['public']['Deal']['title'];
     updatedAt: FieldOutputTypes['public']['Deal']['updatedAt'];
+    userId: FieldOutputTypes['public']['Deal']['userId'];
     value: FieldOutputTypes['public']['Deal']['value'];
     company: public_Company | null;
-    readonly [RelationKeys]?: 'company';
+    tasks: public_Task[];
+    user: public_User | null;
+    readonly [RelationKeys]?: 'company' | 'tasks' | 'user';
   };
   export type public_Lead = {
     companyId: FieldOutputTypes['public']['Lead']['companyId'];
@@ -364,18 +372,49 @@ export namespace Models {
     source: FieldOutputTypes['public']['Lead']['source'];
     status: FieldOutputTypes['public']['Lead']['status'];
     updatedAt: FieldOutputTypes['public']['Lead']['updatedAt'];
+    userId: FieldOutputTypes['public']['Lead']['userId'];
     value: FieldOutputTypes['public']['Lead']['value'];
     company: public_Company | null;
-    readonly [RelationKeys]?: 'company';
+    tasks: public_Task[];
+    user: public_User | null;
+    readonly [RelationKeys]?: 'company' | 'tasks' | 'user';
+  };
+  export type public_Task = {
+    contactId: FieldOutputTypes['public']['Task']['contactId'];
+    createdAt: FieldOutputTypes['public']['Task']['createdAt'];
+    dealId: FieldOutputTypes['public']['Task']['dealId'];
+    description: FieldOutputTypes['public']['Task']['description'];
+    done: FieldOutputTypes['public']['Task']['done'];
+    due: FieldOutputTypes['public']['Task']['due'];
+    id: FieldOutputTypes['public']['Task']['id'];
+    leadId: FieldOutputTypes['public']['Task']['leadId'];
+    priority: FieldOutputTypes['public']['Task']['priority'];
+    title: FieldOutputTypes['public']['Task']['title'];
+    type: FieldOutputTypes['public']['Task']['type'];
+    updatedAt: FieldOutputTypes['public']['Task']['updatedAt'];
+    userId: FieldOutputTypes['public']['Task']['userId'];
+    contact: public_Contact | null;
+    deal: public_Deal | null;
+    lead: public_Lead | null;
+    user: public_User;
+    readonly [RelationKeys]?: 'contact' | 'deal' | 'lead' | 'user';
   };
   export type public_User = {
     createdAt: FieldOutputTypes['public']['User']['createdAt'];
     email: FieldOutputTypes['public']['User']['email'];
     id: FieldOutputTypes['public']['User']['id'];
+    isActive: FieldOutputTypes['public']['User']['isActive'];
     name: FieldOutputTypes['public']['User']['name'];
+    passwordHash: FieldOutputTypes['public']['User']['passwordHash'];
+    role: FieldOutputTypes['public']['User']['role'];
     updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
     username: FieldOutputTypes['public']['User']['username'];
-    readonly [RelationKeys]?: never;
+    companies: public_Company[];
+    contacts: public_Contact[];
+    deals: public_Deal[];
+    leads: public_Lead[];
+    tasks: public_Task[];
+    readonly [RelationKeys]?: 'companies' | 'contacts' | 'deals' | 'leads' | 'tasks';
   };
 }
 
@@ -385,6 +424,7 @@ export declare const models: {
     Contact: Models.public_Contact;
     Deal: Models.public_Deal;
     Lead: Models.public_Lead;
+    Task: Models.public_Task;
     User: Models.public_User;
   };
 };
@@ -470,6 +510,12 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly website: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -479,8 +525,28 @@ type ContractBase = Omit<
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
-              indexes: readonly [];
-              foreignKeys: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Company_userId_idx_a489d58a';
+                  readonly prefix: 'Company_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Company';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
             readonly Contact: {
               columns: {
@@ -545,6 +611,12 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['email'] }];
@@ -555,8 +627,26 @@ type ContractBase = Omit<
                   readonly columns: readonly ['companyId'];
                   readonly unique: false;
                 },
+                {
+                  readonly name: 'Contact_userId_idx_a489d58a';
+                  readonly prefix: 'Contact_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
               ];
               foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Contact';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -637,6 +727,12 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly value: {
                   readonly dataType: 'pg/float8';
                   readonly codecId: 'pg/float8@1';
@@ -657,8 +753,26 @@ type ContractBase = Omit<
                   readonly columns: readonly ['companyId'];
                   readonly unique: false;
                 },
+                {
+                  readonly name: 'Deal_userId_idx_a489d58a';
+                  readonly prefix: 'Deal_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
               ];
               foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Deal';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -762,6 +876,12 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly value: {
                   readonly dataType: 'pg/float8';
                   readonly codecId: 'pg/float8@1';
@@ -782,8 +902,26 @@ type ContractBase = Omit<
                   readonly columns: readonly ['companyId'];
                   readonly unique: false;
                 },
+                {
+                  readonly name: 'Lead_userId_idx_a489d58a';
+                  readonly prefix: 'Lead_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
               ];
               foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Lead';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -793,6 +931,186 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'Company';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly Task: {
+              columns: {
+                readonly contactId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly dealId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly description: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly done: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly due: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly leadId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly priority: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'Medium'>;
+                  };
+                  readonly many: false;
+                };
+                readonly title: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly type: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'Follow-up'>;
+                  };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Task_contactId_idx_ec98db2a';
+                  readonly prefix: 'Task_contactId_idx';
+                  readonly columns: readonly ['contactId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Task_dealId_idx_3e3b3068';
+                  readonly prefix: 'Task_dealId_idx';
+                  readonly columns: readonly ['dealId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Task_leadId_idx_9113844c';
+                  readonly prefix: 'Task_leadId_idx';
+                  readonly columns: readonly ['leadId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Task_userId_idx_a489d58a';
+                  readonly prefix: 'Task_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Task';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Task';
+                    readonly columns: readonly ['leadId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Lead';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Task';
+                    readonly columns: readonly ['contactId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Contact';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Task';
+                    readonly columns: readonly ['dealId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Deal';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -824,10 +1142,36 @@ type ContractBase = Omit<
                   };
                   readonly many: false;
                 };
+                readonly isActive: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
                 readonly name: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly passwordHash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly role: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'SALES_REP'>;
+                  };
                   readonly many: false;
                 };
                 readonly updatedAt: {
@@ -864,6 +1208,7 @@ type ContractBase = Omit<
     readonly Contact: { readonly namespace: 'public' & NamespaceId; readonly model: 'Contact' };
     readonly Deal: { readonly namespace: 'public' & NamespaceId; readonly model: 'Deal' };
     readonly Lead: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+    readonly Task: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
   };
   readonly domain: {
@@ -916,6 +1261,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly userId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly website: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -949,6 +1298,15 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['companyId'];
                 };
               };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'Company';
@@ -963,6 +1321,7 @@ type ContractBase = Omit<
                 readonly name: { readonly column: 'name' };
                 readonly phone: { readonly column: 'phone' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
                 readonly website: { readonly column: 'website' };
               };
             };
@@ -1013,6 +1372,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly userId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
             };
             readonly relations: {
               readonly company: {
@@ -1024,6 +1387,23 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['companyId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly tasks: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['contactId'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -1041,6 +1421,7 @@ type ContractBase = Omit<
                 readonly lastName: { readonly column: 'lastName' };
                 readonly phone: { readonly column: 'phone' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
               };
             };
           };
@@ -1090,6 +1471,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly userId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly value: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
@@ -1108,6 +1493,23 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly tasks: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['dealId'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'Deal';
@@ -1121,6 +1523,7 @@ type ContractBase = Omit<
                 readonly stage: { readonly column: 'stage' };
                 readonly title: { readonly column: 'title' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
                 readonly value: { readonly column: 'value' };
               };
             };
@@ -1183,6 +1586,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly userId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly value: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
@@ -1198,6 +1605,23 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['companyId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly tasks: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['leadId'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -1218,7 +1642,136 @@ type ContractBase = Omit<
                 readonly source: { readonly column: 'source' };
                 readonly status: { readonly column: 'status' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
                 readonly value: { readonly column: 'value' };
+              };
+            };
+          };
+          readonly Task: {
+            readonly fields: {
+              readonly contactId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly dealId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly description: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly done: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly due: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly leadId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly priority: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly title: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly contact: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Contact';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['contactId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly deal: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Deal' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['dealId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly lead: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['leadId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Task';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly contactId: { readonly column: 'contactId' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly dealId: { readonly column: 'dealId' };
+                readonly description: { readonly column: 'description' };
+                readonly done: { readonly column: 'done' };
+                readonly due: { readonly column: 'due' };
+                readonly id: { readonly column: 'id' };
+                readonly leadId: { readonly column: 'leadId' };
+                readonly priority: { readonly column: 'priority' };
+                readonly title: { readonly column: 'title' };
+                readonly type: { readonly column: 'type' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
               };
             };
           };
@@ -1240,8 +1793,20 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
+              readonly isActive: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly name: {
                 readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly passwordHash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly role: {
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly updatedAt: {
@@ -1257,7 +1822,54 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly companies: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Company';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly contacts: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Contact';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly deals: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Deal' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly leads: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly tasks: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'User';
               readonly namespaceId: 'public';
@@ -1265,7 +1877,10 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly email: { readonly column: 'email' };
                 readonly id: { readonly column: 'id' };
+                readonly isActive: { readonly column: 'isActive' };
                 readonly name: { readonly column: 'name' };
+                readonly passwordHash: { readonly column: 'passwordHash' };
+                readonly role: { readonly column: 'role' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
                 readonly username: { readonly column: 'username' };
               };
@@ -1420,6 +2035,35 @@ type ContractBase = Omit<
           };
           readonly ref: {
             readonly entry: 'Lead';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Task';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Task';
             readonly field: 'updatedAt';
             readonly namespace: 'public';
           };

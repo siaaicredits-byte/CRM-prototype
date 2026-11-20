@@ -1,10 +1,22 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 export async function GET() {
   try {
-    const contacts = await db.orm.public.Contact.where({}).all();
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const contacts = await db.orm.public.Contact
+      .where({ userId: currentUser.id })
+      .all();
 
     return NextResponse.json({
       success: true,
@@ -22,6 +34,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const firstName = String(body.firstName ?? "").trim();
@@ -31,8 +52,9 @@ export async function POST(request: NextRequest) {
     const jobTitle = String(body.jobTitle ?? "").trim();
 
     const companyId =
-      body.companyId === null || body.companyId === undefined
-        || body.companyId === ""
+      body.companyId === null ||
+      body.companyId === undefined ||
+      body.companyId === ""
         ? null
         : Number(body.companyId);
 
@@ -60,15 +82,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify that the selected company belongs to the logged-in user.
     if (companyId !== null) {
       const company = await db.orm.public.Company
-        .where({ id: companyId })
+        .where({
+          id: companyId,
+          userId: currentUser.id,
+        })
         .first();
 
       if (!company) {
         return NextResponse.json(
-          { success: false, message: "Selected company does not exist." },
-          { status: 400 }
+          {
+            success: false,
+            message: "Selected company does not exist or you do not have access to it.",
+          },
+          { status: 403 }
         );
       }
     }
@@ -80,6 +109,7 @@ export async function POST(request: NextRequest) {
       phone: phone || null,
       jobTitle: jobTitle || null,
       companyId,
+      userId: currentUser.id,
     });
 
     return NextResponse.json(
@@ -94,7 +124,10 @@ export async function POST(request: NextRequest) {
     console.error("Create contact failed:", error);
 
     return NextResponse.json(
-      { success: false, message: "Unable to create contact." },
+      {
+        success: false,
+        message: "Unable to create contact.",
+      },
       { status: 500 }
     );
   }

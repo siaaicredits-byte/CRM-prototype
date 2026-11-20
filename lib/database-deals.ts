@@ -1,11 +1,23 @@
 
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 import type { Deal, DealStageId } from "@/types/crm";
 
 export async function getDatabaseDeals(): Promise<Deal[]> {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return [];
+  }
+
   const [records, companies] = await Promise.all([
-    db.orm.public.Deal.where({}).all(),
-    db.orm.public.Company.where({}).all(),
+    db.orm.public.Deal
+      .where({ userId: currentUser.id })
+      .all(),
+
+    db.orm.public.Company
+      .where({ userId: currentUser.id })
+      .all(),
   ]);
 
   const companyNames = new Map(
