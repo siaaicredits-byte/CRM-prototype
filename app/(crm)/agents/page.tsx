@@ -1,61 +1,46 @@
 import type { Metadata } from "next";
-import { Zap } from "lucide-react";
-import { agentIcons } from "@/components/agents/agent-meta";
-import { AgentStatusBadge } from "@/components/agents/AgentStatusBadge";
-import { Card } from "@/components/ui/Card";
+import { AgentWorkspace } from "@/components/agents/AgentWorkspace";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { agents } from "@/lib/demo-data";
+import { MeetingAssistantPanel } from "@/components/agents/MeetingAssistantPanel";
+import { SalesAnalystPanel } from "@/components/agents/SalesAnalystPanel";
 
-export const metadata: Metadata = { title: "AI Agents" };
+export const metadata: Metadata = {
+  title: "AI Agents",
+};
 
 export default function AgentsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="AI Agents"
-        description="Six specialised agents that will organise, score, write, track, prepare and analyse."
+        description="Run CRM agents to score leads and prepare sales actions."
       />
 
-      <div className="animate-fade-up rounded-2xl border border-accent/25 bg-accent-soft p-4 text-sm text-ink">
-        <p>
-          <span className="font-medium">Not connected yet.</span>{" "}
-          <span className="text-ink-muted">
-            The agents are defined here, but none run in this phase. They are connected to the AI provider and
-            database in a later phase. Until then, nothing on this page produces AI output.
-          </span>
-        </p>
-      </div>
+      <div className="rounded-2xl border border-accent/25 bg-accent-soft p-4 text-sm text-ink">
+  <span className="font-medium">Six CRM agents are available.</span>{" "}
+  <span className="text-ink-muted">
+    Agents currently use rule-based logic and templates to organise leads,
+    calculate scores, prepare follow-ups, track deals, prepare meetings,
+    and analyse sales. Claude-powered functionality requires API configuration.
+  </span>
+</div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {agents.map((agent, index) => {
-          const Icon = agentIcons[agent.id];
-          return (
-            <Card key={agent.id} delay={index + 1} className="flex flex-col p-5 transition-colors hover:border-line-strong">
-              <div className="flex items-start justify-between gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-accent-soft text-accent ring-1 ring-accent/25">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <AgentStatusBadge status={agent.status} />
-              </div>
-              <h2 className="mt-4 font-semibold text-ink">{agent.name}</h2>
-              <p className="mt-1 flex-1 text-sm text-ink-muted">{agent.description}</p>
-              <dl className="mt-5 space-y-2 border-t border-line pt-4 text-xs">
-                <div className="flex items-start gap-2">
-                  <dt className="flex items-center gap-1.5 text-ink-faint">
-                    <Zap className="size-3.5" aria-hidden="true" />
-                    Trigger
-                  </dt>
-                  <dd className="text-ink">{agent.trigger}</dd>
-                </div>
-                <div className="flex items-start gap-2">
-                  <dt className="text-ink-faint">Last run</dt>
-                  <dd className="text-ink">{agent.lastRun ?? "Never"}</dd>
-                </div>
-              </dl>
-            </Card>
-          );
-        })}
-      </div>
+      <AgentWorkspace />
+
+      <SalesAnalystPanel />
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-ink">
+            Meeting Assistant
+          </h2>
+          <p className="text-sm text-ink-muted">
+            Prepare meeting agendas and organise follow-up actions.
+          </p>
+        </div>
+
+        <MeetingAssistantPanel />
+      </section>
     </div>
   );
 }
