@@ -14,7 +14,10 @@ model User {
   contacts     Contact[]
   companies    Company[]
   deals        Deal[]
-
+  calendarEvents CalendarEvent[]
+  automations     Automation[]
+  automationRuns  AutomationRun[]
+  notifications Notification[]
   createdAt    DateTime  @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt
 }
@@ -27,11 +30,12 @@ model Company {
   email       String?
   address     String?
   description String?
-  userId      Int?
-  user        User?     @relation(fields: [userId], references: [id])
+  userId Int
+user   User @relation(fields: [userId], references: [id])
   contacts    Contact[]
   leads       Lead[]
   deals       Deal[]
+  calendarEvents CalendarEvent[]
   createdAt   DateTime  @default(now()) @onCreate(now())
   updatedAt   temporal.UpdatedAt
 }
@@ -44,13 +48,14 @@ model Contact {
   email     String?   @unique
   phone     String?
   jobTitle  String?
-  userId    Int?
-  user      User?     @relation(fields: [userId], references: [id])
+  userId Int
+user   User @relation(fields: [userId], references: [id])
   companyId Int?
   company   Company?  @relation(fields: [companyId], references: [id])
   createdAt DateTime  @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
   tasks        Task[]
+  calendarEvents CalendarEvent[]
 }
 
 model Lead {
@@ -64,13 +69,14 @@ model Lead {
   score     Int?
   value     Float    @default(0)
   owner     String   @default("Unassigned")
-  userId    Int?
-  user      User?    @relation(fields: [userId], references: [id])
+  userId Int
+user   User @relation(fields: [userId], references: [id])
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
   createdAt DateTime @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
   tasks        Task[]
+  calendarEvents CalendarEvent[]
 }
 
 model Deal {
@@ -81,8 +87,9 @@ model Deal {
   owner     String   @default("Unassigned")
   closeDate DateTime
   tasks        Task[]
-  userId    Int?
-  user      User?    @relation(fields: [userId], references: [id])
+  calendarEvents CalendarEvent[]
+ userId Int
+user   User @relation(fields: [userId], references: [id])
 
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
@@ -114,4 +121,90 @@ model Task {
 
   createdAt   DateTime @default(now()) @onCreate(now())
   updatedAt   temporal.UpdatedAt
+}
+
+model Automation {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  triggerType String
+  conditions  String?
+  actionType  String
+  actionConfig String?
+  isActive    Boolean  @default(true)
+  lastRunAt   DateTime?
+
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  runs        AutomationRun[]
+
+  createdAt   DateTime @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
+}
+
+model AutomationRun {
+  id           Int      @id @default(autoincrement())
+  status       String   @default("PENDING")
+  triggerData  String?
+  result       String?
+  error        String?
+  startedAt    DateTime @default(now())
+  completedAt  DateTime?
+
+  automationId Int
+  automation   Automation @relation(fields: [automationId], references: [id])
+
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt    DateTime @default(now()) @onCreate(now())
+  updatedAt    temporal.UpdatedAt
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  location    String?
+  type        String   @default("MEETING")
+  status      String   @default("SCHEDULED")
+
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  leadId      Int?
+  lead        Lead?    @relation(fields: [leadId], references: [id])
+
+  contactId   Int?
+  contact     Contact? @relation(fields: [contactId], references: [id])
+
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  dealId      Int?
+  deal        Deal?    @relation(fields: [dealId], references: [id])
+
+  createdAt   DateTime @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  href      String?
+  dedupeKey String?  @unique
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @onCreate(now())
+
+  @@index([userId, isRead, createdAt])
+  @@index([userId, createdAt])
 }

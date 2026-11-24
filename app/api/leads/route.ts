@@ -1,4 +1,4 @@
-
+import { runAutomationEvent } from "@/lib/automations/run-automation";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
 import { getCurrentUser } from "@/lib/auth/authenticate";
@@ -121,6 +121,24 @@ export async function POST(request: NextRequest) {
       owner: currentUser.name || currentUser.email,
       userId: currentUser.id,
     });
+       try {
+      await runAutomationEvent(currentUser.id, "LEAD_CREATED", {
+        lead: {
+          id: lead.id,
+          firstName: lead.firstName,
+          lastName: lead.lastName,
+          email: lead.email ?? "",
+          status: lead.status,
+          source: lead.source,
+          score: lead.score,
+          value: lead.value,
+          owner: lead.owner,
+        },
+      });
+    } catch (error) {
+      console.error("Lead-created automation event failed:", error);
+    }
+
 
     return NextResponse.json(
       {

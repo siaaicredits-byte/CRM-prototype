@@ -210,7 +210,7 @@ if (checkingSession) {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          © 2026 PulseCRM. All rights reserved.
+         © 2026 PulseCRM. All rights reserved.
         </p>
       </div>
     </main>

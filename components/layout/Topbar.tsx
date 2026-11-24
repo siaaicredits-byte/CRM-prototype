@@ -1,7 +1,8 @@
 
-import { Bell, Search } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar } from "@/components/ui/Avatar";
 import { MobileNav } from "./MobileNav";
+import { GlobalSearch } from "./GlobalSearch";
 
 interface TopbarProps {
   user: {
@@ -19,30 +20,15 @@ export function Topbar({ user }: TopbarProps) {
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
         <MobileNav user={user} />
 
-        <label className="relative flex min-w-0 max-w-md flex-1 items-center">
-          <span className="sr-only">Search</span>
-          <Search className="pointer-events-none absolute left-3 size-4 text-ink-faint" aria-hidden="true" />
-          <input
-            type="search"
-            disabled
-            placeholder="Search leads, deals, companies…"
-            title="Search becomes available once the database is connected"
-            className="h-9 w-full rounded-lg border border-line bg-surface/70 pl-9 pr-3 text-sm text-ink placeholder:text-ink-faint disabled:cursor-not-allowed"
-          />
-        </label>
+        <GlobalSearch />
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <button
-            type="button"
-            disabled
-            aria-label="Notifications"
-            title="Notifications become available in a later phase"
-            className="inline-flex size-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent"
-          >
-            <Bell className="size-[18px]" aria-hidden="true" />
-          </button>
+          <NotificationBell />
 
-          <span className="hidden h-6 w-px bg-line sm:block" aria-hidden="true" />
+          <span
+            className="hidden h-6 w-px bg-line sm:block"
+            aria-hidden="true"
+          />
 
           <div className="flex items-center gap-2.5 pl-1">
             <Avatar name={displayName} />

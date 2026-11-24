@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
 import { getCurrentUser } from "@/lib/auth/authenticate";
+import { runAutomationEvent } from "@/lib/automations/run-automation";
 
 const validStages = [
   "discovery",
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const deal = await db.orm.public.Deal.create({
+        const deal = await db.orm.public.Deal.create({
       title,
       stage,
       value,
@@ -127,6 +128,21 @@ export async function POST(request: NextRequest) {
       companyId,
       userId: currentUser.id,
     });
+
+    // Trigger automations after successful deal creation.
+    try {
+      await runAutomationEvent(currentUser.id, "DEAL_CREATED", {
+        deal: {
+          id: deal.id,
+          title: deal.title,
+          stage: deal.stage,
+          value: deal.value,
+          owner: deal.owner,
+        },
+      });
+    } catch (error) {
+      console.error("Deal-created automation event failed:", error);
+    }
 
     return NextResponse.json(deal, { status: 201 });
   } catch (error) {

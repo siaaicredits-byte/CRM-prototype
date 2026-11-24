@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";import type { FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarClock,
@@ -41,7 +41,12 @@ export function UpcomingTasks({
   tasks: initialTasks,
   today,
 }: UpcomingTasksProps) {
-  const [tasks, setTasks] = useState(initialTasks);
+ const router = useRouter();
+const [tasks, setTasks] = useState(initialTasks);
+
+useEffect(() => {
+  setTasks(initialTasks);
+}, [initialTasks]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

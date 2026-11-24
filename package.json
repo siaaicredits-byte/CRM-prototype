@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@prisma/cli-engine": "^0.10.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",

@@ -1,4 +1,4 @@
-
+import { runAutomationEvent } from "@/lib/automations/run-automation";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
 import { getCurrentUser } from "@/lib/auth/authenticate";
@@ -98,7 +98,7 @@ export async function PUT(
       );
     }
 
-    await db.orm.public.Lead
+       await db.orm.public.Lead
       .where({ id: leadId, userId: currentUser.id })
       .update({
         firstName,
@@ -111,6 +111,27 @@ export async function PUT(
         value,
       });
 
+    // Run automation only when the lead status changes.
+    if (existingLead.status !== status) {
+      try {
+        await runAutomationEvent(currentUser.id, "LEAD_STATUS_CHANGED", {
+          previousStatus: existingLead.status,
+          lead: {
+            id: existingLead.id,
+            firstName,
+            lastName: lastName || null,
+            email,
+            status,
+            source,
+            score: existingLead.score,
+            value,
+            owner: currentUser.name || currentUser.email,
+          },
+        });
+      } catch (error) {
+        console.error("Lead-status-changed automation event failed:", error);
+      }
+    }
     return NextResponse.json({
       success: true,
       message: "Lead updated successfully.",

@@ -1,9 +1,11 @@
+
 import type { LucideIcon } from "lucide-react";
 import {
   Bot,
   Building2,
   CalendarDays,
   ChartColumn,
+  CheckSquare,
   Handshake,
   LayoutDashboard,
   Settings,
@@ -35,6 +37,7 @@ export const navGroups: NavGroup[] = [
       { label: "Contacts", href: "/contacts", icon: Users },
       { label: "Companies", href: "/companies", icon: Building2 },
       { label: "Deals", href: "/deals", icon: Handshake },
+      { label: "Tasks", href: "/tasks", icon: CheckSquare },
     ],
   },
   {

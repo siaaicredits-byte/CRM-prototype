@@ -1,26 +1,27 @@
+
 import { agentIcons } from "@/components/agents/agent-meta";
-import { AgentStatusBadge } from "@/components/agents/AgentStatusBadge";
 import type { AgentDefinition } from "@/types/crm";
 
 interface AgentStatusPanelProps {
   agents: AgentDefinition[];
 }
 
-/** Compact status grid for the six AI agents. Agents are not connected in Phase 1. */
+/** Dashboard status grid for the six implemented CRM agents. */
 export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
-  const connected = agents.filter((agent) => agent.status !== "not-configured").length;
-
   return (
     <div>
       <p className="mb-4 text-xs text-ink-muted">
         <span className="font-medium text-ink tabular-nums">
-          {connected} of {agents.length}
+          {agents.length} of {agents.length} agents
         </span>{" "}
-        agents connected. The AI layer is set up in a later phase.
+        available. Currently powered by rule-based logic and templates.
+        Claude API integration is not configured yet.
       </p>
+
       <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {agents.map((agent) => {
           const Icon = agentIcons[agent.id];
+
           return (
             <li
               key={agent.id}
@@ -29,13 +30,20 @@ export function AgentStatusPanel({ agents }: AgentStatusPanelProps) {
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent ring-1 ring-accent/20">
                 <Icon className="size-[18px]" aria-hidden="true" />
               </span>
+
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                  <p className="text-sm font-medium text-ink">{agent.name}</p>
-                  <AgentStatusBadge status={agent.status} />
+                  <p className="text-sm font-medium text-ink">
+                    {agent.name}
+                  </p>
+
+                  <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                    Available
+                  </span>
                 </div>
+
                 <p className="mt-1 text-xs text-ink-faint">
-                  Last run: {agent.lastRun ?? "never"}
+                  Rule-based / template-based
                 </p>
               </div>
             </li>

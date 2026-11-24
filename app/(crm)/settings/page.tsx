@@ -1,31 +1,50 @@
+
 import type { Metadata } from "next";
 import { Settings } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PlannedFeatures } from "@/components/ui/PlannedFeatures";
-import { DEMO_USER } from "@/lib/demo-data";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const user = await getCurrentUser();
+
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Settings" description="Your profile, team and workspace configuration." />
+      <PageHeader
+        title="Settings"
+        description="Your profile, team and workspace configuration."
+      />
+
       <Card delay={1}>
-        <CardHeader title="Profile" description="Demo account" />
+        <CardHeader
+          title="Profile"
+          description="Your account information"
+        />
         <CardBody>
-          <div className="flex items-center gap-4">
-            <Avatar name={DEMO_USER.name} size="md" />
-            <div className="min-w-0">
-              <p className="font-medium text-ink">{DEMO_USER.name}</p>
-              <p className="truncate text-sm text-ink-muted">
-                {DEMO_USER.role} · {DEMO_USER.email}
-              </p>
+          {user ? (
+            <div className="flex items-center gap-4">
+              <Avatar name={user.name || user.email} size="md" />
+              <div className="min-w-0">
+                <p className="font-medium text-ink">
+                  {user.name || "User"}
+                </p>
+                <p className="truncate text-sm text-ink-muted">
+                  {user.role} · {user.email}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-ink-muted">
+              Unable to load profile information.
+            </p>
+          )}
         </CardBody>
       </Card>
+
       <PlannedFeatures
         icon={Settings}
         title="Workspace settings"

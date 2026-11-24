@@ -105,7 +105,8 @@ export async function PUT(
   }
 }
 
-// DELETE COMPANY
+
+
 export async function DELETE(
   _request: NextRequest,
   { params }: RouteContext
@@ -130,24 +131,60 @@ export async function DELETE(
       );
     }
 
-    const existing = await db.orm.public.Company
-      .where({ id: companyId, userId: currentUser.id })
-      .first();
+    const deleted = await db.transaction(async (tx) => {
+      const existing = await tx.orm.public.Company
+        .where({
+          id: companyId,
+          userId: currentUser.id,
+        })
+        .first();
 
-    if (!existing) {
+      if (!existing) {
+        return false;
+      }
+
+      // Unlink only this user's related records.
+      await tx.orm.public.Contact
+        .where({
+          companyId,
+          userId: currentUser.id,
+        })
+        .update({ companyId: null });
+
+      await tx.orm.public.Lead
+        .where({
+          companyId,
+          userId: currentUser.id,
+        })
+        .update({ companyId: null });
+
+      await tx.orm.public.Deal
+        .where({
+          companyId,
+          userId: currentUser.id,
+        })
+        .update({ companyId: null });
+
+      await tx.orm.public.Company
+        .where({
+          id: companyId,
+          userId: currentUser.id,
+        })
+        .delete();
+
+      return true;
+    });
+
+    if (!deleted) {
       return NextResponse.json(
         { success: false, message: "Company not found." },
         { status: 404 }
       );
     }
 
-    await db.orm.public.Company
-      .where({ id: companyId, userId: currentUser.id })
-      .delete();
-
     return NextResponse.json({
       success: true,
-      message: "Company deleted successfully.",
+      message: "Company and its associations were safely deleted.",
     });
   } catch (error) {
     console.error("Delete company failed:", error);
@@ -155,8 +192,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        message:
-          "Unable to delete company. It may be linked to existing contacts or leads.",
+        message: "Unable to delete company. Please try again.",
       },
       { status: 500 }
     );

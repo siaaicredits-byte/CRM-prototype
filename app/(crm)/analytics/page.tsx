@@ -63,7 +63,10 @@ function Breakdown({
 
   return (
     <Card>
-      <CardHeader title={title} description="Based on your current CRM records" />
+      <CardHeader
+        title={title}
+        description="Based on your current CRM records"
+      />
       <CardBody>
         <div className="space-y-5">
           {items.map((item) => (
@@ -74,10 +77,13 @@ function Breakdown({
                   {formatNumber(item.count)}
                 </span>
               </div>
+
               <div className="h-2.5 overflow-hidden rounded-full bg-surface-raised">
                 <div
                   className="h-full rounded-full bg-accent transition-all"
-                  style={{ width: `${(item.count / max) * 100}%` }}
+                  style={{
+                    width: `${(item.count / max) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -109,6 +115,12 @@ export default async function AnalyticsPage() {
     value: analytics.stageSummary[key]?.value ?? 0,
   }));
 
+  // Total value across all deal stages, including Closed Won.
+  const totalStageValue = stageItems.reduce(
+    (sum, stage) => sum + stage.value,
+    0
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -116,71 +128,97 @@ export default async function AnalyticsPage() {
         description="Reports generated from your live CRM database."
       />
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Main metrics */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           title="Total Leads"
           value={formatNumber(analytics.totalLeads)}
           description="Current lead records"
         />
+
         <MetricCard
           title="Total Deals"
           value={formatNumber(analytics.totalDeals)}
           description="All deal records"
         />
+
         <MetricCard
           title="Won Deals"
           value={formatNumber(analytics.wonDeals)}
           description="Successfully closed deals"
         />
+
         <MetricCard
-          title="Deal Conversion"
+          title="Deal Win Rate"
           value={`${analytics.conversionRate.toFixed(1)}%`}
           description="Won deals / all deals"
         />
+
+        <MetricCard
+          title="Open Pipeline"
+          value={formatCurrency(analytics.totalPipelineValue)}
+          description="Value excluding Closed Won"
+        />
       </section>
 
+      {/* Lead reports */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <Breakdown title="Leads by status" items={statusItems} />
-        <Breakdown title="Leads by source" items={sourceItems} />
+        <Breakdown
+          title="Leads by status"
+          items={statusItems}
+        />
+
+        <Breakdown
+          title="Leads by source"
+          items={sourceItems}
+        />
       </div>
 
+      {/* Deal pipeline */}
       <Card>
         <CardHeader
           title="Deals by pipeline stage"
-          description="Current deal count and value at each stage"
+          description="Deal count and value across all pipeline stages"
         />
+
         <CardBody>
           <div className="space-y-5">
-            {stageItems.map((stage) => (
-              <div key={stage.label}>
-                <div className="mb-2 flex flex-wrap justify-between gap-2 text-sm">
-                  <span className="font-medium text-ink">
-                    {stage.label}
-                    <span className="ml-2 text-ink-faint">
-                      {formatNumber(stage.count)} deals
+            {stageItems.map((stage) => {
+              const percentage =
+                totalStageValue > 0
+                  ? (stage.value / totalStageValue) * 100
+                  : 0;
+
+              return (
+                <div key={stage.label}>
+                  <div className="mb-2 flex flex-wrap justify-between gap-2 text-sm">
+                    <span className="font-medium text-ink">
+                      {stage.label}
+                      <span className="ml-2 text-ink-faint">
+                        {formatNumber(stage.count)} deals
+                      </span>
                     </span>
-                  </span>
-                  <span className="font-medium tabular-nums text-ink">
-                    {formatCurrency(stage.value)}
-                  </span>
+
+                    <span className="font-medium tabular-nums text-ink">
+                      {formatCurrency(stage.value)}
+                    </span>
+                  </div>
+
+                  <div className="h-2.5 overflow-hidden rounded-full bg-surface-raised">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all"
+                      style={{
+                        width: `${percentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <p className="mt-1 text-right text-xs text-ink-faint">
+                    {percentage.toFixed(1)}% of total deal value
+                  </p>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-surface-raised">
-                  <div
-                    className="h-full rounded-full bg-accent"
-                    style={{
-                      width: `${
-                        analytics.totalPipelineValue > 0
-                          ? Math.min(
-                              100,
-                              (stage.value / analytics.totalPipelineValue) * 100
-                            )
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardBody>
       </Card>
