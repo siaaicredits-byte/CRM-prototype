@@ -18,6 +18,8 @@ model User {
   automations     Automation[]
   automationRuns  AutomationRun[]
   notifications Notification[]
+  projectMemberships ProjectMember[]
+  createdProjects    Project[] @relation("ProjectCreator")
   createdAt    DateTime  @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt
 }
@@ -73,6 +75,9 @@ model Lead {
 user   User @relation(fields: [userId], references: [id])
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
+    projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id])
+  answers   LeadAnswer[]
   createdAt DateTime @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
   tasks        Task[]
@@ -207,4 +212,67 @@ model Notification {
 
   @@index([userId, isRead, createdAt])
   @@index([userId, createdAt])
+}
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+
+  createdById Int
+  creator     User     @relation("ProjectCreator", fields: [createdById], references: [id])
+
+  members     ProjectMember[]
+  leads       Lead[]
+  questions   LeadQuestion[]
+
+  createdAt   DateTime @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
+}
+
+model ProjectMember {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  userId    Int
+
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @onCreate(now())
+
+  @@unique([projectId, userId])
+}
+
+model LeadQuestion {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  question    String
+  fieldKey    String
+  answerType  String   @default("TEXT")
+  options     String?
+  isRequired  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  project     Project  @relation(fields: [projectId], references: [id])
+  answers     LeadAnswer[]
+
+  createdAt   DateTime @default(now()) @onCreate(now())
+  updatedAt   temporal.UpdatedAt
+
+  @@unique([projectId, fieldKey])
+}
+
+model LeadAnswer {
+  id         Int          @id @default(autoincrement())
+  leadId     Int
+  questionId Int
+  answer     String?
+
+  lead       Lead         @relation(fields: [leadId], references: [id])
+  question   LeadQuestion @relation(fields: [questionId], references: [id])
+
+  createdAt  DateTime     @default(now()) @onCreate(now())
+
+  @@unique([leadId, questionId])
 }

@@ -1,17 +1,19 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
-import { isActivePath, navGroups } from "./nav-items";
+import { getNavGroups, isActivePath } from "./nav-items";
 
 interface SidebarNavProps {
-  /** Called after a link is chosen (used to close the mobile drawer). */
+  role: string;
   onNavigate?: () => void;
 }
 
-export function SidebarNav({ onNavigate }: SidebarNavProps) {
+export function SidebarNav({ role, onNavigate }: SidebarNavProps) {
   const pathname = usePathname();
+  const navGroups = getNavGroups(role);
 
   return (
     <nav aria-label="Main" className="flex flex-col gap-6">
@@ -20,11 +22,13 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
           <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
             {group.label}
           </p>
+
           <ul className="flex flex-col gap-0.5">
             {group.items.map(({ label, href, icon: Icon }) => {
               const active = isActivePath(pathname, href);
+
               return (
-                <li key={href}>
+                <li key={`${group.label}-${href}`}>
                   <Link
                     href={href}
                     onClick={onNavigate}
@@ -43,13 +47,17 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
                         active ? "opacity-100" : "opacity-0",
                       )}
                     />
+
                     <Icon
                       className={cn(
                         "size-[18px] shrink-0 transition-colors",
-                        active ? "text-accent" : "text-ink-faint group-hover:text-ink-muted",
+                        active
+                          ? "text-accent"
+                          : "text-ink-faint group-hover:text-ink-muted",
                       )}
                       aria-hidden="true"
                     />
+
                     {label}
                   </Link>
                 </li>
@@ -62,7 +70,6 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
   );
 }
 
-/** Static fallback shown while the pathname resolves (Cache Components). */
 export function SidebarNavFallback() {
   return (
     <div className="flex flex-col gap-2" aria-hidden="true">

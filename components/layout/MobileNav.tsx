@@ -84,7 +84,10 @@ export function MobileNav({ user }: MobileNavProps) {
           </div>
           <div className="flex-1 overflow-y-auto">
             <Suspense fallback={<SidebarNavFallback />}>
-              <SidebarNav onNavigate={() => setOpen(false)} />
+              <SidebarNav
+  role={user.role}
+  onNavigate={() => setOpen(false)}
+/>
             </Suspense>
           </div>
           <div className="pt-4">

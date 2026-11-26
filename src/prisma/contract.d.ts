@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'76836359932dcee21593b080bb6f7e13cc9bedcadc939c23a0785fcb575e0ea2'>;
+  StorageHashBase<'91c3ad102310b5e00de9435c5b6ddd988b8046a020f11440b67718334a0c3252'>;
 export type ExecutionHash =
-  ExecutionHashBase<'d133771a1359ca86cb25a6800f900cecbbf5b41d2d4126bf55b4e237eb7a1386'>;
+  ExecutionHashBase<'94a92ff5d8d293e9d16da989d2497c66fa72cad0d7a0b1d6649517736ccc0a7d'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -427,17 +427,47 @@ export namespace Models {
     lastName: FieldOutputTypes['public']['Lead']['lastName'];
     owner: FieldOutputTypes['public']['Lead']['owner'];
     phone: FieldOutputTypes['public']['Lead']['phone'];
+    projectId: FieldOutputTypes['public']['Lead']['projectId'];
     score: FieldOutputTypes['public']['Lead']['score'];
     source: FieldOutputTypes['public']['Lead']['source'];
     status: FieldOutputTypes['public']['Lead']['status'];
     updatedAt: FieldOutputTypes['public']['Lead']['updatedAt'];
     userId: FieldOutputTypes['public']['Lead']['userId'];
     value: FieldOutputTypes['public']['Lead']['value'];
+    answers: public_LeadAnswer[];
     calendarEvents: public_CalendarEvent[];
     company: public_Company | null;
+    project: public_Project | null;
     tasks: public_Task[];
     user: public_User;
-    readonly [RelationKeys]?: 'calendarEvents' | 'company' | 'tasks' | 'user';
+    readonly [RelationKeys]?:
+      'answers' | 'calendarEvents' | 'company' | 'project' | 'tasks' | 'user';
+  };
+  export type public_LeadAnswer = {
+    answer: FieldOutputTypes['public']['LeadAnswer']['answer'];
+    createdAt: FieldOutputTypes['public']['LeadAnswer']['createdAt'];
+    id: FieldOutputTypes['public']['LeadAnswer']['id'];
+    leadId: FieldOutputTypes['public']['LeadAnswer']['leadId'];
+    questionId: FieldOutputTypes['public']['LeadAnswer']['questionId'];
+    lead: public_Lead;
+    question: public_LeadQuestion;
+    readonly [RelationKeys]?: 'lead' | 'question';
+  };
+  export type public_LeadQuestion = {
+    answerType: FieldOutputTypes['public']['LeadQuestion']['answerType'];
+    createdAt: FieldOutputTypes['public']['LeadQuestion']['createdAt'];
+    fieldKey: FieldOutputTypes['public']['LeadQuestion']['fieldKey'];
+    id: FieldOutputTypes['public']['LeadQuestion']['id'];
+    isActive: FieldOutputTypes['public']['LeadQuestion']['isActive'];
+    isRequired: FieldOutputTypes['public']['LeadQuestion']['isRequired'];
+    options: FieldOutputTypes['public']['LeadQuestion']['options'];
+    projectId: FieldOutputTypes['public']['LeadQuestion']['projectId'];
+    question: FieldOutputTypes['public']['LeadQuestion']['question'];
+    sortOrder: FieldOutputTypes['public']['LeadQuestion']['sortOrder'];
+    updatedAt: FieldOutputTypes['public']['LeadQuestion']['updatedAt'];
+    answers: public_LeadAnswer[];
+    project: public_Project;
+    readonly [RelationKeys]?: 'answers' | 'project';
   };
   export type public_Notification = {
     createdAt: FieldOutputTypes['public']['Notification']['createdAt'];
@@ -451,6 +481,29 @@ export namespace Models {
     userId: FieldOutputTypes['public']['Notification']['userId'];
     user: public_User;
     readonly [RelationKeys]?: 'user';
+  };
+  export type public_Project = {
+    createdAt: FieldOutputTypes['public']['Project']['createdAt'];
+    createdById: FieldOutputTypes['public']['Project']['createdById'];
+    description: FieldOutputTypes['public']['Project']['description'];
+    id: FieldOutputTypes['public']['Project']['id'];
+    isActive: FieldOutputTypes['public']['Project']['isActive'];
+    name: FieldOutputTypes['public']['Project']['name'];
+    updatedAt: FieldOutputTypes['public']['Project']['updatedAt'];
+    creator: public_User;
+    leads: public_Lead[];
+    members: public_ProjectMember[];
+    questions: public_LeadQuestion[];
+    readonly [RelationKeys]?: 'creator' | 'leads' | 'members' | 'questions';
+  };
+  export type public_ProjectMember = {
+    createdAt: FieldOutputTypes['public']['ProjectMember']['createdAt'];
+    id: FieldOutputTypes['public']['ProjectMember']['id'];
+    projectId: FieldOutputTypes['public']['ProjectMember']['projectId'];
+    userId: FieldOutputTypes['public']['ProjectMember']['userId'];
+    project: public_Project;
+    user: public_User;
+    readonly [RelationKeys]?: 'project' | 'user';
   };
   export type public_Task = {
     contactId: FieldOutputTypes['public']['Task']['contactId'];
@@ -487,9 +540,11 @@ export namespace Models {
     calendarEvents: public_CalendarEvent[];
     companies: public_Company[];
     contacts: public_Contact[];
+    createdProjects: public_Project[];
     deals: public_Deal[];
     leads: public_Lead[];
     notifications: public_Notification[];
+    projectMemberships: public_ProjectMember[];
     tasks: public_Task[];
     readonly [RelationKeys]?:
       | 'automationRuns'
@@ -497,9 +552,11 @@ export namespace Models {
       | 'calendarEvents'
       | 'companies'
       | 'contacts'
+      | 'createdProjects'
       | 'deals'
       | 'leads'
       | 'notifications'
+      | 'projectMemberships'
       | 'tasks';
   };
 }
@@ -513,7 +570,11 @@ export declare const models: {
     Contact: Models.public_Contact;
     Deal: Models.public_Deal;
     Lead: Models.public_Lead;
+    LeadAnswer: Models.public_LeadAnswer;
+    LeadQuestion: Models.public_LeadQuestion;
     Notification: Models.public_Notification;
+    Project: Models.public_Project;
+    ProjectMember: Models.public_ProjectMember;
     Task: Models.public_Task;
     User: Models.public_User;
   };
@@ -1382,6 +1443,12 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
+                readonly projectId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly score: {
                   readonly dataType: 'pg/int4';
                   readonly codecId: 'pg/int4@1';
@@ -1438,6 +1505,12 @@ type ContractBase = Omit<
                   readonly unique: false;
                 },
                 {
+                  readonly name: 'Lead_projectId_idx_a96e4d92';
+                  readonly prefix: 'Lead_projectId_idx';
+                  readonly columns: readonly ['projectId'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'Lead_userId_idx_a489d58a';
                   readonly prefix: 'Lead_userId_idx';
                   readonly columns: readonly ['userId'];
@@ -1466,6 +1539,217 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'Company';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Lead';
+                    readonly columns: readonly ['projectId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Project';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly LeadAnswer: {
+              columns: {
+                readonly answer: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly leadId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly questionId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['leadId', 'questionId'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'LeadAnswer_leadId_idx_9113844c';
+                  readonly prefix: 'LeadAnswer_leadId_idx';
+                  readonly columns: readonly ['leadId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'LeadAnswer_questionId_idx_fdb42076';
+                  readonly prefix: 'LeadAnswer_questionId_idx';
+                  readonly columns: readonly ['questionId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'LeadAnswer';
+                    readonly columns: readonly ['leadId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Lead';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'LeadAnswer';
+                    readonly columns: readonly ['questionId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'LeadQuestion';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly LeadQuestion: {
+              columns: {
+                readonly answerType: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'TEXT'>;
+                  };
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly fieldKey: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly isActive: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
+                readonly isRequired: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly options: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly projectId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly question: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly sortOrder: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['projectId', 'fieldKey'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'LeadQuestion_projectId_idx_a96e4d92';
+                  readonly prefix: 'LeadQuestion_projectId_idx';
+                  readonly columns: readonly ['projectId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'LeadQuestion';
+                    readonly columns: readonly ['projectId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Project';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1569,6 +1853,163 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'Notification';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly Project: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly createdById: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly description: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly isActive: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['name'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'Project_createdById_idx_8bf640ed';
+                  readonly prefix: 'Project_createdById_idx';
+                  readonly columns: readonly ['createdById'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Project';
+                    readonly columns: readonly ['createdById'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly ProjectMember: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly projectId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['projectId', 'userId'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'ProjectMember_projectId_idx_a96e4d92';
+                  readonly prefix: 'ProjectMember_projectId_idx';
+                  readonly columns: readonly ['projectId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'ProjectMember_userId_idx_a489d58a';
+                  readonly prefix: 'ProjectMember_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'ProjectMember';
+                    readonly columns: readonly ['projectId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Project';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'ProjectMember';
                     readonly columns: readonly ['userId'];
                   };
                   readonly target: {
@@ -1863,9 +2304,22 @@ type ContractBase = Omit<
     readonly Contact: { readonly namespace: 'public' & NamespaceId; readonly model: 'Contact' };
     readonly Deal: { readonly namespace: 'public' & NamespaceId; readonly model: 'Deal' };
     readonly Lead: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+    readonly LeadAnswer: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'LeadAnswer';
+    };
+    readonly LeadQuestion: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'LeadQuestion';
+    };
     readonly Notification: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'Notification';
+    };
+    readonly Project: { readonly namespace: 'public' & NamespaceId; readonly model: 'Project' };
+    readonly ProjectMember: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProjectMember';
     };
     readonly Task: { readonly namespace: 'public' & NamespaceId; readonly model: 'Task' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
@@ -2620,6 +3074,10 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly projectId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly score: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -2650,6 +3108,17 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
+              readonly answers: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'LeadAnswer';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['leadId'];
+                };
+              };
               readonly calendarEvents: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -2670,6 +3139,18 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['companyId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly project: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Project';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['projectId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -2703,12 +3184,173 @@ type ContractBase = Omit<
                 readonly lastName: { readonly column: 'lastName' };
                 readonly owner: { readonly column: 'owner' };
                 readonly phone: { readonly column: 'phone' };
+                readonly projectId: { readonly column: 'projectId' };
                 readonly score: { readonly column: 'score' };
                 readonly source: { readonly column: 'source' };
                 readonly status: { readonly column: 'status' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
                 readonly userId: { readonly column: 'userId' };
                 readonly value: { readonly column: 'value' };
+              };
+            };
+          };
+          readonly LeadAnswer: {
+            readonly fields: {
+              readonly answer: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly leadId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly questionId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly lead: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['leadId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly question: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'LeadQuestion';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['questionId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'LeadAnswer';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly answer: { readonly column: 'answer' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly leadId: { readonly column: 'leadId' };
+                readonly questionId: { readonly column: 'questionId' };
+              };
+            };
+          };
+          readonly LeadQuestion: {
+            readonly fields: {
+              readonly answerType: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly fieldKey: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly isActive: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly isRequired: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly options: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly projectId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly question: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly sortOrder: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly answers: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'LeadAnswer';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['questionId'];
+                };
+              };
+              readonly project: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Project';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['projectId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'LeadQuestion';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly answerType: { readonly column: 'answerType' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly fieldKey: { readonly column: 'fieldKey' };
+                readonly id: { readonly column: 'id' };
+                readonly isActive: { readonly column: 'isActive' };
+                readonly isRequired: { readonly column: 'isRequired' };
+                readonly options: { readonly column: 'options' };
+                readonly projectId: { readonly column: 'projectId' };
+                readonly question: { readonly column: 'question' };
+                readonly sortOrder: { readonly column: 'sortOrder' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -2778,6 +3420,157 @@ type ContractBase = Omit<
                 readonly message: { readonly column: 'message' };
                 readonly title: { readonly column: 'title' };
                 readonly type: { readonly column: 'type' };
+                readonly userId: { readonly column: 'userId' };
+              };
+            };
+          };
+          readonly Project: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly createdById: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly description: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly isActive: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly creator: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['createdById'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly leads: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Lead' };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['projectId'];
+                };
+              };
+              readonly members: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProjectMember';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['projectId'];
+                };
+              };
+              readonly questions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'LeadQuestion';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['projectId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Project';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly createdById: { readonly column: 'createdById' };
+                readonly description: { readonly column: 'description' };
+                readonly id: { readonly column: 'id' };
+                readonly isActive: { readonly column: 'isActive' };
+                readonly name: { readonly column: 'name' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly ProjectMember: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly projectId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly project: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Project';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['projectId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'ProjectMember';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly projectId: { readonly column: 'projectId' };
                 readonly userId: { readonly column: 'userId' };
               };
             };
@@ -3013,6 +3806,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['userId'];
                 };
               };
+              readonly createdProjects: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Project';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['createdById'];
+                };
+              };
               readonly deals: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Deal' };
                 readonly cardinality: '1:N';
@@ -3033,6 +3837,17 @@ type ContractBase = Omit<
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'Notification';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly projectMemberships: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProjectMember';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -3312,7 +4127,89 @@ type ContractBase = Omit<
             readonly params: { readonly precision: 3 };
           };
           readonly ref: {
+            readonly entry: 'LeadAnswer';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'LeadQuestion';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'LeadQuestion';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
             readonly entry: 'Notification';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Project';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Project';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'ProjectMember';
             readonly field: 'createdAt';
             readonly namespace: 'public';
           };

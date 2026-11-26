@@ -22,7 +22,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       <div className="-mx-1 flex-1 overflow-y-auto px-1">
         <Suspense fallback={<SidebarNavFallback />}>
-          <SidebarNav />
+          <SidebarNav role={user.role} />
         </Suspense>
       </div>
 

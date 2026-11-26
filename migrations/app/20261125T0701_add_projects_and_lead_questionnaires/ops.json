@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "table.LeadAnswer",
+    "label": "Create table \"LeadAnswer\"",
+    "summary": "Creates table \"LeadAnswer\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"LeadAnswer\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"LeadAnswer\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"LeadAnswer\"",
+        "sql": "CREATE TABLE \"public\".\"LeadAnswer\" (\n  \"answer\" text,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"leadId\" int4 NOT NULL,\n  \"questionId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"LeadAnswer\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"LeadAnswer\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.LeadQuestion",
+    "label": "Create table \"LeadQuestion\"",
+    "summary": "Creates table \"LeadQuestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "LeadQuestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"LeadQuestion\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LeadQuestion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"LeadQuestion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"LeadQuestion\"",
+        "sql": "CREATE TABLE \"public\".\"LeadQuestion\" (\n  \"answerType\" text DEFAULT 'TEXT' NOT NULL,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"fieldKey\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"isRequired\" bool DEFAULT false NOT NULL,\n  \"options\" text,\n  \"projectId\" int4 NOT NULL,\n  \"question\" text NOT NULL,\n  \"sortOrder\" int4 DEFAULT 0 NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"LeadQuestion\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"LeadQuestion\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"LeadQuestion\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Project",
+    "label": "Create table \"Project\"",
+    "summary": "Creates table \"Project\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Project"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Project\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Project\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Project\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Project\"",
+        "sql": "CREATE TABLE \"public\".\"Project\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"createdById\" int4 NOT NULL,\n  \"description\" text,\n  \"id\" SERIAL NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Project\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Project\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Project\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ProjectMember",
+    "label": "Create table \"ProjectMember\"",
+    "summary": "Creates table \"ProjectMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ProjectMember\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ProjectMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ProjectMember\"",
+        "sql": "CREATE TABLE \"public\".\"ProjectMember\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"projectId\" int4 NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ProjectMember\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ProjectMember\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "column.public.Lead.projectId",
+    "label": "Add column \"projectId\" to \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "projectId",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"projectId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Lead",
+          "projectId"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"projectId\" on \"Lead\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"projectId\"",
+        "sql": "ALTER TABLE \"public\".\"Lead\" ADD COLUMN \"projectId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"projectId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Lead",
+          "projectId"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"projectId\" on \"Lead\""
+        }
+      },
+      {
+        "description": "verify column \"projectId\" has type \"integer\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Lead",
+          "projectId",
+          "integer"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.LeadAnswer.LeadAnswer_leadId_questionId_key",
+    "label": "Add unique constraint on \"LeadAnswer\" (leadId, questionId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "LeadAnswer_leadId_questionId_key",
+        "table": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"LeadAnswer_leadId_questionId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LeadAnswer_leadId_questionId_key",
+          "public",
+          "\"public\".\"LeadAnswer\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"LeadAnswer_leadId_questionId_key\" on \"LeadAnswer\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"LeadAnswer_leadId_questionId_key\"",
+        "sql": "ALTER TABLE \"public\".\"LeadAnswer\" ADD CONSTRAINT \"LeadAnswer_leadId_questionId_key\" UNIQUE (\"leadId\", \"questionId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"LeadAnswer_leadId_questionId_key\" exists on (leadId, questionId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "LeadAnswer_leadId_questionId_key",
+          "public",
+          "\"public\".\"LeadAnswer\"",
+          "u",
+          "[\"leadId\",\"questionId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.LeadQuestion.LeadQuestion_projectId_fieldKey_key",
+    "label": "Add unique constraint on \"LeadQuestion\" (projectId, fieldKey)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "LeadQuestion_projectId_fieldKey_key",
+        "table": "LeadQuestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"LeadQuestion_projectId_fieldKey_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LeadQuestion_projectId_fieldKey_key",
+          "public",
+          "\"public\".\"LeadQuestion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"LeadQuestion_projectId_fieldKey_key\" on \"LeadQuestion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"LeadQuestion_projectId_fieldKey_key\"",
+        "sql": "ALTER TABLE \"public\".\"LeadQuestion\" ADD CONSTRAINT \"LeadQuestion_projectId_fieldKey_key\" UNIQUE (\"projectId\", \"fieldKey\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"LeadQuestion_projectId_fieldKey_key\" exists on (projectId, fieldKey)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "LeadQuestion_projectId_fieldKey_key",
+          "public",
+          "\"public\".\"LeadQuestion\"",
+          "u",
+          "[\"projectId\",\"fieldKey\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Project.Project_name_key",
+    "label": "Add unique constraint on \"Project\" (name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Project_name_key",
+        "table": "Project"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Project_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Project_name_key",
+          "public",
+          "\"public\".\"Project\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Project_name_key\" on \"Project\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Project_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Project\" ADD CONSTRAINT \"Project_name_key\" UNIQUE (\"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Project_name_key\" exists on (name)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Project_name_key",
+          "public",
+          "\"public\".\"Project\"",
+          "u",
+          "[\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.ProjectMember.ProjectMember_projectId_userId_key",
+    "label": "Add unique constraint on \"ProjectMember\" (projectId, userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "ProjectMember_projectId_userId_key",
+        "table": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"ProjectMember_projectId_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ProjectMember_projectId_userId_key",
+          "public",
+          "\"public\".\"ProjectMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"ProjectMember_projectId_userId_key\" on \"ProjectMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"ProjectMember_projectId_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"ProjectMember\" ADD CONSTRAINT \"ProjectMember_projectId_userId_key\" UNIQUE (\"projectId\", \"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"ProjectMember_projectId_userId_key\" exists on (projectId, userId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "ProjectMember_projectId_userId_key",
+          "public",
+          "\"public\".\"ProjectMember\"",
+          "u",
+          "[\"projectId\",\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Lead.Lead_projectId_idx_a96e4d92",
+    "label": "Create index \"Lead_projectId_idx_a96e4d92\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Lead_projectId_idx_a96e4d92",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Lead_projectId_idx_a96e4d92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_projectId_idx_a96e4d92\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Lead_projectId_idx_a96e4d92\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Lead_projectId_idx_a96e4d92\"",
+        "sql": "CREATE INDEX \"Lead_projectId_idx_a96e4d92\" ON \"public\".\"Lead\" (\"projectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Lead_projectId_idx_a96e4d92\" exists on \"Lead\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_projectId_idx_a96e4d92\"",
+          "i",
+          "I",
+          "\"public\".\"Lead\"",
+          "btree",
+          "[\"projectId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.LeadAnswer.LeadAnswer_leadId_idx_9113844c",
+    "label": "Create index \"LeadAnswer_leadId_idx_9113844c\" on \"LeadAnswer\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "LeadAnswer_leadId_idx_9113844c",
+        "table": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"LeadAnswer_leadId_idx_9113844c\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer_leadId_idx_9113844c\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"LeadAnswer_leadId_idx_9113844c\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"LeadAnswer_leadId_idx_9113844c\"",
+        "sql": "CREATE INDEX \"LeadAnswer_leadId_idx_9113844c\" ON \"public\".\"LeadAnswer\" (\"leadId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"LeadAnswer_leadId_idx_9113844c\" exists on \"LeadAnswer\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer_leadId_idx_9113844c\"",
+          "i",
+          "I",
+          "\"public\".\"LeadAnswer\"",
+          "btree",
+          "[\"leadId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.LeadAnswer.LeadAnswer_questionId_idx_fdb42076",
+    "label": "Create index \"LeadAnswer_questionId_idx_fdb42076\" on \"LeadAnswer\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "LeadAnswer_questionId_idx_fdb42076",
+        "table": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"LeadAnswer_questionId_idx_fdb42076\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer_questionId_idx_fdb42076\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"LeadAnswer_questionId_idx_fdb42076\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"LeadAnswer_questionId_idx_fdb42076\"",
+        "sql": "CREATE INDEX \"LeadAnswer_questionId_idx_fdb42076\" ON \"public\".\"LeadAnswer\" (\"questionId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"LeadAnswer_questionId_idx_fdb42076\" exists on \"LeadAnswer\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"LeadAnswer_questionId_idx_fdb42076\"",
+          "i",
+          "I",
+          "\"public\".\"LeadAnswer\"",
+          "btree",
+          "[\"questionId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.LeadQuestion.LeadQuestion_projectId_idx_a96e4d92",
+    "label": "Create index \"LeadQuestion_projectId_idx_a96e4d92\" on \"LeadQuestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "LeadQuestion_projectId_idx_a96e4d92",
+        "table": "LeadQuestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"LeadQuestion_projectId_idx_a96e4d92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LeadQuestion_projectId_idx_a96e4d92\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"LeadQuestion_projectId_idx_a96e4d92\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"LeadQuestion_projectId_idx_a96e4d92\"",
+        "sql": "CREATE INDEX \"LeadQuestion_projectId_idx_a96e4d92\" ON \"public\".\"LeadQuestion\" (\"projectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"LeadQuestion_projectId_idx_a96e4d92\" exists on \"LeadQuestion\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"LeadQuestion_projectId_idx_a96e4d92\"",
+          "i",
+          "I",
+          "\"public\".\"LeadQuestion\"",
+          "btree",
+          "[\"projectId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Project.Project_createdById_idx_8bf640ed",
+    "label": "Create index \"Project_createdById_idx_8bf640ed\" on \"Project\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Project_createdById_idx_8bf640ed",
+        "table": "Project"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Project_createdById_idx_8bf640ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Project_createdById_idx_8bf640ed\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Project_createdById_idx_8bf640ed\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Project_createdById_idx_8bf640ed\"",
+        "sql": "CREATE INDEX \"Project_createdById_idx_8bf640ed\" ON \"public\".\"Project\" (\"createdById\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Project_createdById_idx_8bf640ed\" exists on \"Project\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Project_createdById_idx_8bf640ed\"",
+          "i",
+          "I",
+          "\"public\".\"Project\"",
+          "btree",
+          "[\"createdById\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ProjectMember.ProjectMember_projectId_idx_a96e4d92",
+    "label": "Create index \"ProjectMember_projectId_idx_a96e4d92\" on \"ProjectMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ProjectMember_projectId_idx_a96e4d92",
+        "table": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ProjectMember_projectId_idx_a96e4d92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember_projectId_idx_a96e4d92\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ProjectMember_projectId_idx_a96e4d92\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ProjectMember_projectId_idx_a96e4d92\"",
+        "sql": "CREATE INDEX \"ProjectMember_projectId_idx_a96e4d92\" ON \"public\".\"ProjectMember\" (\"projectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ProjectMember_projectId_idx_a96e4d92\" exists on \"ProjectMember\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember_projectId_idx_a96e4d92\"",
+          "i",
+          "I",
+          "\"public\".\"ProjectMember\"",
+          "btree",
+          "[\"projectId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ProjectMember.ProjectMember_userId_idx_a489d58a",
+    "label": "Create index \"ProjectMember_userId_idx_a489d58a\" on \"ProjectMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ProjectMember_userId_idx_a489d58a",
+        "table": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ProjectMember_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember_userId_idx_a489d58a\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ProjectMember_userId_idx_a489d58a\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ProjectMember_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"ProjectMember_userId_idx_a489d58a\" ON \"public\".\"ProjectMember\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ProjectMember_userId_idx_a489d58a\" exists on \"ProjectMember\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ProjectMember_userId_idx_a489d58a\"",
+          "i",
+          "I",
+          "\"public\".\"ProjectMember\"",
+          "btree",
+          "[\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.LeadAnswer.LeadAnswer_leadId_fkey",
+    "label": "Add foreign key \"LeadAnswer_leadId_fkey\" on \"LeadAnswer\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "LeadAnswer_leadId_fkey",
+        "table": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"LeadAnswer_leadId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LeadAnswer_leadId_fkey",
+          "public",
+          "\"public\".\"LeadAnswer\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"LeadAnswer_leadId_fkey\" on \"LeadAnswer\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"LeadAnswer_leadId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"LeadAnswer\"\nADD CONSTRAINT \"LeadAnswer_leadId_fkey\"\nFOREIGN KEY (\"leadId\")\nREFERENCES \"public\".\"Lead\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"LeadAnswer_leadId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "LeadAnswer_leadId_fkey",
+          "public",
+          "\"public\".\"LeadAnswer\"",
+          "f",
+          "[\"leadId\"]",
+          "\"public\".\"Lead\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.LeadAnswer.LeadAnswer_questionId_fkey",
+    "label": "Add foreign key \"LeadAnswer_questionId_fkey\" on \"LeadAnswer\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "LeadAnswer_questionId_fkey",
+        "table": "LeadAnswer"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"LeadAnswer_questionId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LeadAnswer_questionId_fkey",
+          "public",
+          "\"public\".\"LeadAnswer\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"LeadAnswer_questionId_fkey\" on \"LeadAnswer\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"LeadAnswer_questionId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"LeadAnswer\"\nADD CONSTRAINT \"LeadAnswer_questionId_fkey\"\nFOREIGN KEY (\"questionId\")\nREFERENCES \"public\".\"LeadQuestion\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"LeadAnswer_questionId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "LeadAnswer_questionId_fkey",
+          "public",
+          "\"public\".\"LeadAnswer\"",
+          "f",
+          "[\"questionId\"]",
+          "\"public\".\"LeadQuestion\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.LeadQuestion.LeadQuestion_projectId_fkey",
+    "label": "Add foreign key \"LeadQuestion_projectId_fkey\" on \"LeadQuestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "LeadQuestion_projectId_fkey",
+        "table": "LeadQuestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"LeadQuestion_projectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LeadQuestion_projectId_fkey",
+          "public",
+          "\"public\".\"LeadQuestion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"LeadQuestion_projectId_fkey\" on \"LeadQuestion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"LeadQuestion_projectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"LeadQuestion\"\nADD CONSTRAINT \"LeadQuestion_projectId_fkey\"\nFOREIGN KEY (\"projectId\")\nREFERENCES \"public\".\"Project\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"LeadQuestion_projectId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "LeadQuestion_projectId_fkey",
+          "public",
+          "\"public\".\"LeadQuestion\"",
+          "f",
+          "[\"projectId\"]",
+          "\"public\".\"Project\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Project.Project_createdById_fkey",
+    "label": "Add foreign key \"Project_createdById_fkey\" on \"Project\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Project_createdById_fkey",
+        "table": "Project"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Project_createdById_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Project_createdById_fkey",
+          "public",
+          "\"public\".\"Project\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Project_createdById_fkey\" on \"Project\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Project_createdById_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Project\"\nADD CONSTRAINT \"Project_createdById_fkey\"\nFOREIGN KEY (\"createdById\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Project_createdById_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Project_createdById_fkey",
+          "public",
+          "\"public\".\"Project\"",
+          "f",
+          "[\"createdById\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Lead.Lead_projectId_fkey",
+    "label": "Add foreign key \"Lead_projectId_fkey\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Lead_projectId_fkey",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Lead_projectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Lead_projectId_fkey",
+          "public",
+          "\"public\".\"Lead\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Lead_projectId_fkey\" on \"Lead\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Lead_projectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Lead\"\nADD CONSTRAINT \"Lead_projectId_fkey\"\nFOREIGN KEY (\"projectId\")\nREFERENCES \"public\".\"Project\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Lead_projectId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Lead_projectId_fkey",
+          "public",
+          "\"public\".\"Lead\"",
+          "f",
+          "[\"projectId\"]",
+          "\"public\".\"Project\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.ProjectMember.ProjectMember_projectId_fkey",
+    "label": "Add foreign key \"ProjectMember_projectId_fkey\" on \"ProjectMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "ProjectMember_projectId_fkey",
+        "table": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"ProjectMember_projectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ProjectMember_projectId_fkey",
+          "public",
+          "\"public\".\"ProjectMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"ProjectMember_projectId_fkey\" on \"ProjectMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"ProjectMember_projectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"ProjectMember\"\nADD CONSTRAINT \"ProjectMember_projectId_fkey\"\nFOREIGN KEY (\"projectId\")\nREFERENCES \"public\".\"Project\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"ProjectMember_projectId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "ProjectMember_projectId_fkey",
+          "public",
+          "\"public\".\"ProjectMember\"",
+          "f",
+          "[\"projectId\"]",
+          "\"public\".\"Project\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.ProjectMember.ProjectMember_userId_fkey",
+    "label": "Add foreign key \"ProjectMember_userId_fkey\" on \"ProjectMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "ProjectMember_userId_fkey",
+        "table": "ProjectMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"ProjectMember_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ProjectMember_userId_fkey",
+          "public",
+          "\"public\".\"ProjectMember\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"ProjectMember_userId_fkey\" on \"ProjectMember\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"ProjectMember_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"ProjectMember\"\nADD CONSTRAINT \"ProjectMember_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"ProjectMember_userId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "ProjectMember_userId_fkey",
+          "public",
+          "\"public\".\"ProjectMember\"",
+          "f",
+          "[\"userId\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  }
+]

@@ -13,8 +13,12 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getDashboardData } from "@/lib/database-dashboard";
 import { agents, dealStages } from "@/lib/demo-data";
 import { formatDate } from "@/lib/format";
+import { getCurrentUser } from "@/lib/auth/authenticate";
+import { getMasterAdminDashboardData } from "@/lib/database-master-admin-dashboard";
+import { MasterAdminDashboard } from "@/components/dashboard/MasterAdminDashboard";
 
 export const metadata: Metadata = { title: "Dashboard" };
+export const instant = false;
 
 function ViewAllLink({ href, label }: { href: string; label: string }) {
   return (
@@ -30,6 +34,18 @@ function ViewAllLink({ href, label }: { href: string; label: string }) {
 
 export default async function DashboardPage() {
   await connection();
+
+  const currentUser = await getCurrentUser();
+
+  if (currentUser?.role === "MASTER_ADMIN") {
+    const masterDashboard = await getMasterAdminDashboardData();
+
+    if (!masterDashboard) {
+      return null;
+    }
+
+    return <MasterAdminDashboard dashboard={masterDashboard} />;
+  }
 
   const dashboard = await getDashboardData();
 

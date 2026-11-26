@@ -1,4 +1,4 @@
-
+import { ImportLeadsButton } from "@/components/leads/ImportLeadsButton";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Badge } from "@/components/ui/Badge";
@@ -51,11 +51,12 @@ export default function LeadsPage() {
         title="Leads"
         description="Every inbound and outbound lead, newest first."
         actions={
-          <>
-            <Badge tone="accent">Live database</Badge>
-            <AddLeadButton />
-          </>
-        }
+  <>
+    <Badge tone="accent">Live database</Badge>
+    <ImportLeadsButton />
+    <AddLeadButton />
+  </>
+}
       />
 
       <Suspense fallback={<LeadsLoading />}>

@@ -7,11 +7,18 @@ import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
+type Project = {
+  id: number;
+  name: string;
+};
+
 export function AddLeadButton() {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [projectsLoading, setProjectsLoading] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -23,12 +30,33 @@ export function AddLeadButton() {
     status: "NEW",
     owner: "Alex Morgan",
     value: "0",
+    projectId: "",
   });
 
-  function updateField(
-    name: string,
-    value: string
-  ) {
+  async function openForm() {
+    setOpen(true);
+    setError("");
+    setProjectsLoading(true);
+
+    try {
+      const response = await fetch("/api/projects");
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Unable to load projects.");
+      }
+
+      setProjects(result.projects || []);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Unable to load projects."
+      );
+    } finally {
+      setProjectsLoading(false);
+    }
+  }
+
+  function updateField(name: string, value: string) {
     setForm((previous) => ({
       ...previous,
       [name]: value,
@@ -49,6 +77,9 @@ export function AddLeadButton() {
         body: JSON.stringify({
           ...form,
           value: Number(form.value),
+          projectId: form.projectId
+            ? Number(form.projectId)
+            : null,
         }),
       });
 
@@ -67,6 +98,7 @@ export function AddLeadButton() {
         status: "NEW",
         owner: "Alex Morgan",
         value: "0",
+        projectId: "",
       });
 
       setOpen(false);
@@ -90,7 +122,7 @@ export function AddLeadButton() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openForm}
         className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-hover"
       >
         <Plus size={16} />
@@ -186,7 +218,6 @@ export function AddLeadButton() {
                     />
                   </div>
 
-                  {/* Lead Source */}
                   <div>
                     <label className={labelClass}>Lead Source</label>
                     <CustomSelect
@@ -207,7 +238,6 @@ export function AddLeadButton() {
                     />
                   </div>
 
-                  {/* Lead Status */}
                   <div>
                     <label className={labelClass}>Status</label>
                     <CustomSelect
@@ -252,6 +282,28 @@ export function AddLeadButton() {
                       step="0.01"
                     />
                   </div>
+
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>Project</label>
+                    <CustomSelect
+                      value={form.projectId}
+                      onChange={(value) =>
+                        updateField("projectId", value)
+                      }
+                      options={[
+                        { value: "", label: "No Project" },
+                        ...projects.map((project) => ({
+                          value: String(project.id),
+                          label: project.name,
+                        })),
+                      ]}
+                    />
+                    {projectsLoading && (
+                      <p className="mt-1 text-xs text-ink-muted">
+                        Loading projects...
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {error && (
@@ -271,7 +323,7 @@ export function AddLeadButton() {
 
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || projectsLoading}
                     className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-50"
                   >
                     {loading ? "Saving..." : "Create Lead"}

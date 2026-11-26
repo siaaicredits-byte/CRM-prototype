@@ -1,11 +1,13 @@
+
 import "server-only";
 
+import type { NextRequest } from "next/server";
 import { db } from "@/src/prisma/db";
 import { verifySession } from "@/lib/auth/session";
 import { getSessionCookie } from "@/lib/auth/session-cookie";
 
-export async function getCurrentUser() {
-  const token = await getSessionCookie();
+export async function getCurrentUser(request?: NextRequest) {
+  const token = await getSessionCookie(request);
 
   if (!token) {
     return null;

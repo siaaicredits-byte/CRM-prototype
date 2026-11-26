@@ -23,12 +23,60 @@ export async function getDatabaseLeads(): Promise<Lead[]> {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
+    console.log("[LEADS DEBUG] No authenticated user.");
     return [];
   }
 
-  const records = await db.orm.public.Lead
-    .where({ userId: currentUser.id })
-    .all();
+  let records;
+
+  console.log("[LEADS DEBUG] User:", {
+    id: currentUser.id,
+    role: currentUser.role,
+  });
+
+  if (currentUser.role === "MASTER_ADMIN") {
+    records = await db.orm.public.Lead.all();
+
+    console.log("[LEADS DEBUG] Master Admin - all leads:", records.length);
+  } else {
+    const memberships = await db.orm.public.ProjectMember
+      .where({ userId: currentUser.id })
+      .all();
+
+    const projectIds = memberships.map((membership) =>
+      Number(membership.projectId)
+    );
+
+    console.log("[LEADS DEBUG] Assigned project IDs:", projectIds);
+
+    const projectLeadGroups = await Promise.all(
+      projectIds.map((projectId) =>
+        db.orm.public.Lead.where({ projectId }).all()
+      )
+    );
+
+    const ownedLeads = await db.orm.public.Lead
+      .where({ userId: currentUser.id })
+      .all();
+
+    const unassignedOwnedLeads = ownedLeads.filter(
+      (lead) => lead.projectId === null
+    );
+
+    records = Array.from(
+      new Map(
+        [...projectLeadGroups.flat(), ...unassignedOwnedLeads].map(
+          (record) => [Number(record.id), record]
+        )
+      ).values()
+    );
+
+    console.log("[LEADS DEBUG] Results:", {
+      projectLeads: projectLeadGroups.flat().length,
+      ownUnassignedLeads: unassignedOwnedLeads.length,
+      totalVisibleLeads: records.length,
+    });
+  }
 
   return records.map((record) => {
     const source = record.source as LeadSource;

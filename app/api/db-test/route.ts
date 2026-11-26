@@ -1,32 +1,37 @@
 ﻿
 import { connection, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
+import { getCurrentUser } from "@/lib/auth/authenticate";
 
 export async function GET() {
-  // Prevent database queries during build-time prerendering.
   await connection();
 
   try {
-    const lead = await db.orm.public.Lead
-      .where({ id: 1 })
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    await db.orm.public.User
+      .where({ id: user.id })
       .first();
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Prisma connected to PostgreSQL",
-        databaseQuerySuccessful: true,
-        sampleLead: lead,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Database connection successful.",
+      databaseQuerySuccessful: true,
+    });
   } catch (error) {
     console.error("Database test failed:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Database connection or query failed",
+        message: "Database connection or query failed.",
       },
       { status: 500 }
     );

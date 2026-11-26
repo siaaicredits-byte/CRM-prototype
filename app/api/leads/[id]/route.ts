@@ -1,3 +1,4 @@
+
 import { runAutomationEvent } from "@/lib/automations/run-automation";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/prisma/db";
@@ -44,13 +45,36 @@ export async function PUT(
     }
 
     const existingLead = await db.orm.public.Lead
-      .where({ id: leadId, userId: currentUser.id })
+      .where({ id: leadId })
       .first();
 
     if (!existingLead) {
       return NextResponse.json(
         { success: false, message: "Lead not found." },
         { status: 404 }
+      );
+    }
+
+    // Check whether the user can access this lead.
+    let hasAccess =
+      currentUser.role === "MASTER_ADMIN" ||
+      Number(existingLead.userId) === currentUser.id;
+
+    if (!hasAccess && existingLead.projectId !== null) {
+      const membership = await db.orm.public.ProjectMember
+        .where({
+          projectId: Number(existingLead.projectId),
+          userId: currentUser.id,
+        })
+        .first();
+
+      hasAccess = Boolean(membership);
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { success: false, message: "You do not have access to this lead." },
+        { status: 403 }
       );
     }
 
@@ -98,8 +122,8 @@ export async function PUT(
       );
     }
 
-       await db.orm.public.Lead
-      .where({ id: leadId, userId: currentUser.id })
+    await db.orm.public.Lead
+      .where({ id: leadId })
       .update({
         firstName,
         lastName: lastName || null,
@@ -132,6 +156,7 @@ export async function PUT(
         console.error("Lead-status-changed automation event failed:", error);
       }
     }
+
     return NextResponse.json({
       success: true,
       message: "Lead updated successfully.",
@@ -171,7 +196,7 @@ export async function DELETE(
     }
 
     const existingLead = await db.orm.public.Lead
-      .where({ id: leadId, userId: currentUser.id })
+      .where({ id: leadId })
       .first();
 
     if (!existingLead) {
@@ -181,8 +206,31 @@ export async function DELETE(
       );
     }
 
+    // Check whether the user can access this lead.
+    let hasAccess =
+      currentUser.role === "MASTER_ADMIN" ||
+      Number(existingLead.userId) === currentUser.id;
+
+    if (!hasAccess && existingLead.projectId !== null) {
+      const membership = await db.orm.public.ProjectMember
+        .where({
+          projectId: Number(existingLead.projectId),
+          userId: currentUser.id,
+        })
+        .first();
+
+      hasAccess = Boolean(membership);
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { success: false, message: "You do not have access to this lead." },
+        { status: 403 }
+      );
+    }
+
     await db.orm.public.Lead
-      .where({ id: leadId, userId: currentUser.id })
+      .where({ id: leadId })
       .delete();
 
     return NextResponse.json({
